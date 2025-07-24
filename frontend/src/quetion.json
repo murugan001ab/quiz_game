@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "Which class is the superclass of all AWT components?",
+    "options": ["Component", "Container", "JComponent", "Object"],
+    "answer": "Component"
+  },
+  {
+    "id": 2,
+    "question": "Which Swing class is the superclass of all lightweight components?",
+    "options": ["Component", "Container", "JComponent", "JFrame"],
+    "answer": "JComponent"
+  },
+  {
+    "id": 3,
+    "question": "Which Swing container is used to create a main window?",
+    "options": ["JPanel", "JFrame", "JButton", "JLabel"],
+    "answer": "JFrame"
+  },
+  {
+    "id": 4,
+    "question": "Which method is used to add a component to a container?",
+    "options": ["insert()", "add()", "attach()", "append()"],
+    "answer": "add()"
+  },
+  {
+    "id": 5,
+    "question": "Which component is used to group other components?",
+    "options": ["JLabel", "JButton", "JPanel", "JFrame"],
+    "answer": "JPanel"
+  },
+  {
+    "id": 6,
+    "question": "Which package must be imported to use Swing components?",
+    "options": ["java.swing", "javax.awt", "javax.swing", "java.awt"],
+    "answer": "javax.swing"
+  },
+  {
+    "id": 7,
+    "question": "What is the default layout for JFrame?",
+    "options": ["FlowLayout", "GridLayout", "BorderLayout", "BoxLayout"],
+    "answer": "BorderLayout"
+  },
+  {
+    "id": 8,
+    "question": "Which method sets the layout manager of a container?",
+    "options": ["setLayout()", "addLayout()", "useLayout()", "configureLayout()"],
+    "answer": "setLayout()"
+  },
+  {
+    "id": 9,
+    "question": "Which component can display a single line of uneditable text?",
+    "options": ["JTextField", "JLabel", "JTextArea", "JButton"],
+    "answer": "JLabel"
+  },
+  {
+    "id": 10,
+    "question": "Which Swing class is used to create a button?",
+    "options": ["JButton", "JLabel", "JTextField", "JList"],
+    "answer": "JButton"
+  }
+]
