@@ -1,8 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AdminContext } from './AdminProvider';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const QuizPage = () => {
+  const navigate=useNavigate();
   const { index, setIndex } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -11,6 +15,7 @@ const QuizPage = () => {
   const [isFrozen, setIsFrozen] = useState(false);
   const [socket, setSocket] = useState(null);
   const [timeExpired, setTimeExpired] = useState(false);
+  const [isFinshed, setIsFinished] = useState(false);
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -74,6 +79,12 @@ const QuizPage = () => {
     return () => clearInterval(interval);
   }, [questions, index, isFrozen]);
 
+  useEffect(() => {
+    if(index===questions.length-1 && (isFrozen|| timeExpired)) {
+    setIsFinished(true);    }
+    
+  },[isFrozen]);
+
   const handleOptionClick = (option) => {
     if (isFrozen || selectedAnswers[index] || timeExpired) return;
 
@@ -89,14 +100,21 @@ const QuizPage = () => {
     return <div className="loading">Loading questions...</div>;
   }
 
-  if (index >= questions.length) {
-    return (
-      <div className="quiz-completed">
-        <h2>Quiz Completed!</h2>
-        <p>Your score: {score} out of {questions.length}</p>
-      </div>
-    );
+
+  const handleQuizFinished = () => {
+    navigate('/wait');
+    
   }
+    
+
+  // if (index >= questions.length) {
+  //   return (
+  //     <div className="quiz-completed">
+  //       <h2>Quiz Completed!</h2>
+  //       <p>Your score: {score} out of {questions.length}</p>
+  //     </div>
+  //   );
+  // }
 
   const currentQuestion = questions[index];
   const showAnswer = isFrozen && selectedAnswers[index] !== undefined;
@@ -149,6 +167,8 @@ const QuizPage = () => {
           )}
         </div>
       )}
+
+      {isFinshed && <button onClick={()=>handleQuizFinished()}>Finish Quiz</button>}
     </div>
   );
 };

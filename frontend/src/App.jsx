@@ -13,6 +13,7 @@ import AdminPage from './AdminPage';
 import AdminDashboard from './AdminDashboard';
 import NewQuiz from './Newquiz';
 import QuizStartPage from './StartQuiz';
+import WaitForResult from './WaitForResult';
 
 
 
@@ -37,6 +38,7 @@ function App() {
   <Route path="/admin/dashboard" element={<AdminDashboard />} />
   <Route path='/admin/new-quiz' element={<NewQuiz />} />
   <Route path="/admin/start-quiz" element={<QuizStartPage />} />
+  <Route path="/wait" element={<WaitForResult />} />
 
   </Routes>
   </Router>

@@ -17,7 +17,7 @@ const NewQuiz = () => {
       setTimer(prev => {
         const newTime = prev + 1;
         // Enable Next button after 15 seconds
-        if (newTime >= 15 && !enableNext) {
+        if (newTime >= 3 && !enableNext) {
           setEnableNext(true);
         }
         return newTime;
