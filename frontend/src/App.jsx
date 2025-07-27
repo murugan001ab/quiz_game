@@ -1,11 +1,9 @@
-import { useContext, useEffect, useState } from 'react'
-// import './App.css'
+import { useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AdminContext, AdminProvider } from './AdminProvider';
 import AdminLogin from './Admin';
 import AdminCreatePage from './AdminCreate';
 import QuestionManager from './QuestionManager';
-// import { fetchQuestions, GetResult, saveUserScore } from "./api";
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { AdminContext, AdminProvider } from './AdminProvider';
 import Quiz from './Newquiz';
 import QuizPage from './userquiz';
 import ResetPassword from './Forget';
@@ -15,44 +13,79 @@ import NewQuiz from './Newquiz';
 import QuizStartPage from './StartQuiz';
 import NameToReadyFlow from './NametoReadyFlow';
 import NameGet from './NameGet';
-// import ShowResult from './ShowResult';
 import ResultsPage from './ShowResult';
 import WaitForResult from './WaitForResult';
 
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isLogin } = useContext(AdminContext);
+  const storedAdminId = localStorage.getItem('adminId');
+  const storedExpiry = localStorage.getItem('adminSessionExpiry');
 
+  // Check if session is valid
+  const isAuthenticated = () => {
+    return (isLogin || (storedAdminId && storedExpiry && new Date().getTime() < parseInt(storedExpiry)));
+  };
 
+  if (!isAuthenticated()) {
+    // Clear invalid session if exists
+    localStorage.removeItem('adminId');
+    localStorage.removeItem('adminSessionExpiry');
+    return <Navigate to="/admin" replace />;
+  }
 
+  return children;
+};
 
 function App() {
-//  const { isLogin } = useContext(AdminContext);
-  
-  // if (!isLogin) {
-  //   return <Navigate to="/admin/login" replace />;
-  // }
   return (
-  <AdminProvider>
-  <Router>
+    <AdminProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<AdminPage />} />
+          <Route path="/temp" element={<Quiz />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/create" element={<AdminCreatePage />} />
+          <Route path="/forget" element={<ResetPassword />} />
+          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/readyquiz" element={<NameToReadyFlow />} />
+          <Route path="/wait" element={<WaitForResult />} />
 
-    
-  <Routes>
-  <Route path="/" element={<AdminPage />} /> 
-  <Route path="/temp" element={<Quiz />} />
-  <Route path="/admin" element={<AdminLogin />} />
-  <Route path="/admin/create" element={<AdminCreatePage />} />
-  <Route path="/admin/questions" element={<QuestionManager />} /> 
-  <Route path="/quiz" element={<QuizPage />} />  
-  <Route path='/forget' element={<ResetPassword/>}/>
-  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-  <Route path='/admin/new-quiz' element={<NewQuiz />} />
-  <Route path="/admin/start-quiz" element={<QuizStartPage />} />
-  <Route path='/readyquiz' element={<NameToReadyFlow/>}/>
-  <Route path="/admin/nametoready" element={<NameGet />} />
-  <Route path="/results" element={<ResultsPage />} />
-   <Route path="/wait" element={<WaitForResult />} />
-
-  </Routes>
-  </Router>
-  </AdminProvider> 
+          {/* Protected Admin Routes */}
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/questions" element={
+            <ProtectedRoute>
+              <QuestionManager />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/new-quiz" element={
+            <ProtectedRoute>
+              <NewQuiz />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/start-quiz" element={
+            <ProtectedRoute>
+              <QuizStartPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/nametoready" element={
+            <ProtectedRoute>
+              <NameGet />
+            </ProtectedRoute>
+          } />
+          <Route path="/results" element={
+            <ProtectedRoute>
+              <ResultsPage />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Router>
+    </AdminProvider>
   );
 }
 
