@@ -1,0 +1,39 @@
+# Root-level
+.env
+*.log
+.DS_Store
+*.sqlite3
+__pycache__/
+*.py[cod]
+
+# Backend (Django)
+backend/db.sqlite3
+backend/__pycache__/
+backend/**/*.py[cod]
+backend/env/
+backend/venv/
+backend/.env
+backend/staticfiles/
+backend/media/
+
+# Django Migrations
+**/migrations/
+!**/migrations/__init__.py
+
+# Frontend (Vite + Node.js)
+frontend/node_modules/
+frontend/.env
+frontend/.vite/
+frontend/dist/
+frontend/.next/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/package-lock.json
+frontend/pnpm-lock.yaml
+frontend/yarn.lock
+
+# VSCode/IDE files
+.vscode/
+.idea/
+*.swp
