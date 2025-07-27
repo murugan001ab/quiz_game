@@ -7,10 +7,12 @@ export const AdminProvider = ({ children }) => {
   const [Qtime, setQTime] = useState(0);
   const [index,setIndex]=useState(0);
   const [socket, setSocket] = useState(null);
+  const [name, setName] = useState("");
+  
 
 
   return (
-    <AdminContext.Provider value={{ adminId, setAdminId,Qtime,setQTime,index,setIndex ,socket, setSocket }}>
+    <AdminContext.Provider value={{ adminId, setAdminId,Qtime,setQTime,index,setIndex ,socket, setSocket, name, setName }}>
       {children}
     </AdminContext.Provider>
   );

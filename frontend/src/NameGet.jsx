@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { use, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AdminContext } from "./AdminProvider";
 
 function NameGet() {
-    const [name, setName] = useState("");
+    // const [name, setName] = useState("");
     const navigate = useNavigate();
+    const {name,setName}=useContext(AdminContext);
 
     const handleNext = () => {
         if (name.trim()) {
             // Optionally, save the name to context or localStorage here
             navigate("/readyquiz");
+
+            setName(name); // Save name to context for later use
+
         }
     };
 

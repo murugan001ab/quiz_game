@@ -15,6 +15,9 @@ import NewQuiz from './Newquiz';
 import QuizStartPage from './StartQuiz';
 import NameToReadyFlow from './NametoReadyFlow';
 import NameGet from './NameGet';
+// import ShowResult from './ShowResult';
+import ResultsPage from './ShowResult';
+import WaitForResult from './WaitForResult';
 
 
 
@@ -41,6 +44,8 @@ function App() {
   <Route path="/admin/start-quiz" element={<QuizStartPage />} />
   <Route path='/readyquiz' element={<NameToReadyFlow/>}/>
   <Route path="/admin/nametoready" element={<NameGet />} />
+  <Route path="/results" element={<ResultsPage />} />
+   <Route path="/wait" element={<WaitForResult />} />
 
   </Routes>
   </Router>

@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import QuizPage from './userquiz';
 import { AdminContext } from './AdminProvider';
 
-const GetReady = ({ name }) => {
+const GetReady = () => {
   const socket = useRef(null);
   const navigate = useNavigate();
   const [ isShowing, setIsShowing ] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
+
 
   useEffect(() => {
     socket.current = new WebSocket("ws://localhost:8000/ws/chat/");
@@ -21,7 +22,7 @@ const GetReady = ({ name }) => {
       try {
         const data = JSON.parse(event.data);
 
-        console.log("Received message:", data);
+        console.log("Received message:", data,data.show);
 
         if (data.show==true && data.action == 'start') {
           console.log("Quiz is starting...");

@@ -20,7 +20,7 @@ class Admin(models.Model):
 class User(models.Model):
     name = models.CharField(max_length=100)
     score = models.IntegerField(default=0)  # Store quiz score
-    password=models.CharField(max_length=100)
+    admin_id=models.CharField(max_length=100)
 
     def __str__(self):
         return self.name

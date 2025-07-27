@@ -9,6 +9,8 @@ const QuizStartPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
+  const {adminId}=useContext(AdminContext)
+
   useEffect(() => {
     // Connect to WebSocket
     socket.current = new WebSocket("ws://localhost:8000/ws/chat/");
@@ -36,18 +38,23 @@ const QuizStartPage = () => {
   }, []);
 
   const startQuiz = () => {
+
+
     if (connectionStatus !== 'connected') {
       alert('WebSocket not connected. Please try again.');
       return;
     }
 
     setIsLoading(true);
+
+    console.log(adminId)
     
     try {
       socket.current.send(JSON.stringify({ 
         type: 'quiz-control', 
         show: true,
         action: 'start',
+        adminid:adminId,
         timestamp: new Date().toISOString()
       }));
       console.log("Quiz start message sent");

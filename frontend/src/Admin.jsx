@@ -30,6 +30,8 @@ import { useNavigate } from 'react-router-dom';
           // localStorage.setItem('token', res.data.token);
           setAdminId(res.data.admin_id)
 
+          console.log(res.data.admin_id)
+
           navigate('/admin/dashboard'); // Redirect to admin dashboard
 
 

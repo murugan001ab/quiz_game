@@ -48,12 +48,49 @@ class QuizControlConsumer(AsyncWebsocketConsumer):
             {
                 "type": "quiz_control",
                 "show": data.get("show", False),
-                "action": data.get("action", "")
+                "action": data.get("action", ""),
+                "adminid":data.get("adminid")
             }
         )
 
     async def quiz_control(self, event):
         await self.send(text_data=json.dumps({
             "show": event["show"],
-            "action": event["action"]
+            "action": event["action"],
+            "adminid":event["adminid"]
+        }))
+
+class ResultsConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.group_name = "quiz_results"
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+        await self.send(text_data=json.dumps({
+            'type': 'connection',
+            'message': 'Connected to results channel'
+        }))
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+            if data.get('type') == 'show_results':
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {
+                        "type": "send_results_control",
+                        "show": True,
+                        "action": "show_results"
+                    }
+                )
+        except json.JSONDecodeError:
+            pass
+
+    async def send_results_control(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "results_control",
+            "action": event["action"],
+            "show": event["show"]
         }))
