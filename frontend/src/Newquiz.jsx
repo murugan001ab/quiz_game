@@ -1,86 +1,132 @@
 import { useEffect, useState, useContext } from 'react';
-import './App.css';
 import axios from 'axios';
 import { AdminContext } from './AdminProvider';
 
-const Quiz = () => {
+const NewQuiz = () => {
   const [questions, setQuestions] = useState([]);
-  const [finish, setFinish] = useState(false);
-  // FIX: include socket in context
+  const [loading, setLoading] = useState(true);
+  const [selectedOption, setSelectedOption] = useState(null);
   const { index, setIndex, socket, setSocket } = useContext(AdminContext);
+  const [connectionStatus, setConnectionStatus] = useState('connecting');
+  const [timer, setTimer] = useState(0); // Changed to count up
+  const [enableNext, setEnableNext] = useState(false);
 
+  // Timer effect (counts up)
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws/index/');  // Connect to Django WebSocket
-    ws.onopen = () => console.log('Connected');
-    ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      setIndex(data.index);  // Receive updated index from server
+    const timerInterval = setInterval(() => {
+      setTimer(prev => {
+        const newTime = prev + 1;
+        // Enable Next button after 15 seconds
+        if (newTime >= 15 && !enableNext) {
+          setEnableNext(true);
+        }
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [enableNext]);
+
+  // Reset timer when question changes
+  useEffect(() => {
+    setTimer(0);
+    setEnableNext(false);
+  }, [index]);
+
+  // WebSocket connection (unchanged)
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8000/ws/index/');
+    
+    ws.onopen = () => {
+      console.log('WebSocket Connected');
+      setConnectionStatus('connected');
+      setSocket(ws);
     };
-    setSocket(ws);
-    // FIX: cleanup socket on unmount
-    return () => {
-      ws.close();
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.index !== undefined) {
+        setIndex(data.index);
+        console.log('Index start:', data.start,data.index);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setConnectionStatus('error');
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      setConnectionStatus('disconnected');
       setSocket(null);
     };
+
+    return () => ws.close();
   }, [setIndex, setSocket]);
 
-  // FIX: Next/Prev logic
-  const increaseIndex = () => {
-    if (!socket) return;
-    const newIndex = index + 1;
-    socket.send(JSON.stringify({ index: newIndex }));  // Send new index to server
-  };
-  const decreaseIndex = () => {
-    if (!socket) return;
-    const newIndex = index - 1;
-    socket.send(JSON.stringify({ index: newIndex }));  // Send new index to server
-  };
-
-  // Fetch questions once
+  // Fetch questions (unchanged)
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/questions/")
-      .then((res) => setQuestions(res.data))
-      .catch((err) => console.error("Error fetching questions", err));
+      .then(res => {
+        setQuestions(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error fetching questions:", err);
+        setLoading(false);
+      });
   }, []);
 
-  // Watch for index changes and check for finish
-  useEffect(() => {
-    if (questions.length > 0 && index === questions.length - 1) {
-      setFinish(true);
-    } else {
-      setFinish(false);
-    }
-  }, [index, questions]);
+  const changeIndex = (newIndex) => {
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    const validatedIndex = Math.max(0, Math.min(newIndex, questions.length - 1));
+    socket.send(JSON.stringify({ index: validatedIndex,type: 'index_update' }));
+  };
 
-  if (questions.length === 0) return <p>Loading questions...</p>;
+  if (loading) return <div className="loading">Loading questions...</div>;
+  if (questions.length === 0) return <div>No questions available</div>;
 
   const currentQuestion = questions[index] || {};
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Question {index + 1}</h2>
-      <p><strong>{currentQuestion.question_text}</strong></p>
-      <ul>
-        {(currentQuestion.options || []).map((opt, i) => (
-          <li key={i}>
-            <label>
-              <input type="radio" name="option" />
-              {opt}
-            </label>
-          </li>
-        ))}
-      </ul>
+    <div className="quiz-container">
+      <div className="timer-display">
+        Elapsed Time: {timer}s {timer < 15 && "(Next button unlocks in " + (15 - timer) + "s)"}
+      </div>
 
-      <div style={{ marginTop: 20 }}>
-        {/* FIX: Button logic */}
-        <button onClick={decreaseIndex} disabled={index === 0}>Previous</button>
-        {finish
-          ? <button>Finish</button>
-          : <button onClick={increaseIndex} disabled={index === questions.length - 1}>Next</button>
-        }
+      <div className="question-header">
+        Question {index + 1} of {questions.length}
+      </div>
+
+      <h2>{currentQuestion.question_text}</h2>
+
+      <div className="options">
+        {currentQuestion.options.map((opt, i) => (
+          <div 
+            key={i} 
+            className={`option ${selectedOption === i ? 'selected' : ''}`}
+            onClick={() => setSelectedOption(i)}
+          >
+            {opt}
+          </div>
+        ))}
+      </div>
+
+      <div className="navigation">
+      
+        
+        {/* Next/Finish button - controlled by timer */}
+        <button 
+          onClick={() => changeIndex(index + 1)} 
+          disabled={index >= questions.length - 1 || !enableNext}
+          className={!enableNext ? 'disabled-next' : ''}
+        >
+          {index >= questions.length - 1 ? 'Finish Quiz' : 'Next'}
+        </button>
       </div>
     </div>
   );
 };
 
-export default Quiz;
+export default NewQuiz;

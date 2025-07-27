@@ -1,0 +1,325 @@
+import React from 'react';
+import { FiBook, FiSettings, FiBarChart2, FiLogOut } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
+
+const AdminDashboard = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Add logout logic here
+    navigate('/admin');
+  };
+
+  return (
+    <div className="admin-dashboard">
+      {/* Sidebar */}
+      <div className="sidebar">
+        <div className="logo">
+          <FiSettings className="logo-icon" />
+          <h2>QuizMaster Admin</h2>
+        </div>
+        
+        <div className="sidebar-menu">
+          <div className="menu-item active">
+            <FiBarChart2 className="menu-icon" />
+            <span>Dashboard</span>
+          </div>
+          {/* Add more menu items as needed */}
+        </div>
+        
+        <button className="logout-btn" onClick={handleLogout}>
+          <FiLogOut className="logout-icon" />
+          Logout
+        </button>
+      </div>
+
+      {/* Main Content */}
+      <div className="main-content">
+        <header className="dashboard-header">
+          <h1>Admin Dashboard</h1>
+          <div className="user-info">
+            <div className="user-avatar">AD</div>
+            <span>Admin User</span>
+          </div>
+        </header>
+
+        
+
+        {/* Management Buttons */}
+        <div className="management-section">
+          <h2>Quick Actions</h2>
+          <div className="action-buttons">
+            <button 
+              className="action-btn question-btn"
+              onClick={() => navigate('/admin/questions')}
+            >
+              <FiBook className="btn-icon" />
+              <span>Manage Questions</span>
+              <p>Add, edit or remove quiz questions</p>
+            </button>
+            
+            <button 
+              className="action-btn game-btn"
+              onClick={() => navigate('/admin/start-quiz')}
+            >
+              <FiSettings className="btn-icon" />
+              <span>Manage Games</span>
+              <p>Configure game settings and rules</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// CSS Styles
+const styles = `
+  .admin-dashboard {
+    display: flex;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+  }
+
+  /* Sidebar Styles */
+  .sidebar {
+    width: 250px;
+    background: linear-gradient(135deg, #0a2342 0%, #2c4a7f 100%);
+    color: white;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .logo-icon {
+    font-size: 1.8rem;
+    color: #f4b41a;
+  }
+
+  .logo h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .sidebar-menu {
+    flex-grow: 1;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .menu-item:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .menu-item.active {
+    background: rgba(244, 180, 26, 0.2);
+    border-left: 3px solid #f4b41a;
+  }
+
+  .menu-icon {
+    font-size: 1.2rem;
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: white;
+    border: none;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: auto;
+  }
+
+  .logout-btn:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .logout-icon {
+    font-size: 1.2rem;
+  }
+
+  /* Main Content Styles */
+  .main-content {
+    flex-grow: 1;
+    padding: 2rem;
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .dashboard-header h1 {
+    color: #2d3748;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #4a6bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+
+  /* Stats Cards */
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stats-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .stats-card h3 {
+    color: #718096;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .stats-card p {
+    color: #2d3748;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  /* Management Buttons */
+  .management-section {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .management-section h2 {
+    color: #2d3748;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+
+  .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    min-height: 150px;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+
+  .question-btn {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e3e9f5 100%);
+    border-left: 4px solid #4a6bff;
+  }
+
+  .game-btn {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e3e9f5 100%);
+    border-left: 4px solid #f4b41a;
+  }
+
+  .btn-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #2d3748;
+  }
+
+  .action-btn span {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+  }
+
+  .action-btn p {
+    font-size: 0.9rem;
+    color: #718096;
+    margin-top: auto;
+  }
+
+  @media (max-width: 768px) {
+    .admin-dashboard {
+      flex-direction: column;
+    }
+    
+    .sidebar {
+      width: 100%;
+      padding: 1rem;
+    }
+    
+    .action-buttons {
+      grid-template-columns: 1fr;
+    }
+  }
+`;
+
+// Inject styles
+const styleElement = document.createElement('style');
+styleElement.innerHTML = styles;
+document.head.appendChild(styleElement);
+
+export default AdminDashboard;

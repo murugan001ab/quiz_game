@@ -3,10 +3,14 @@
   import { AdminContext } from './AdminProvider';
 import { Link } from 'react-router-dom';
 
+import { useNavigate } from 'react-router-dom';
+
   const AdminLogin = () => {
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+
+    const navigate = useNavigate();
 
 
       const { setAdminId } = useContext(AdminContext);
@@ -25,6 +29,12 @@ import { Link } from 'react-router-dom';
           // You can store token in localStorage or redirect to dashboard
           // localStorage.setItem('token', res.data.token);
           setAdminId(res.data.admin_id)
+
+          navigate('/admin/dashboard'); // Redirect to admin dashboard
+
+
+
+          
         
         } else {
           setMessage('Invalid credentials');
