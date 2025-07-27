@@ -19,7 +19,7 @@ const QuizPage = () => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws/index/');
+    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/index/');
     
     ws.onopen = () => {
       console.log('WebSocket connected');
@@ -50,7 +50,7 @@ const QuizPage = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/questions/");
+        const response = await axios.get("http://quizmastershub.duckdns.org/questions/");
         setQuestions(response.data);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -124,7 +124,7 @@ const QuizPage = () => {
 
     console.log("Quiz finished. Final score:", score,aname,adminId);
     // Submit score to backend
-    axios.post("http://localhost:8000/users/", {
+    axios.post("http://quizmastershub.duckdns.org/users/", {
       name,
       score,
       admin_id

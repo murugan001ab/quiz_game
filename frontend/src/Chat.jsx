@@ -12,7 +12,7 @@ const ChatComponent = ({ roomName, username }) => {
 
   // Reconnect logic
   const connectWebSocket = useCallback(() => {
-    const socketUrl = `ws://localhost:8000/ws/chat/${encodeURIComponent(roomName)}/`;
+    const socketUrl = `ws://quizmastershub.duckdns.org/ws/chat/${encodeURIComponent(roomName)}/`;
     setConnectionStatus('Connecting...');
     setError(null);
 

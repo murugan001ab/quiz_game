@@ -14,7 +14,7 @@ const AdminCreatePage = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:8000/api/admin/create/", adminData);
+      const res = await axios.post("http://quizmastershub.duckdns.org/api/admin/create/", adminData);
       setMessage("Admin created successfully!");
       setAdminData({ name: "", password: "" });
     } catch (err) {

@@ -26,7 +26,7 @@ const AdminLogin = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post('http://localhost:8000/api/admin/login/', {
+      const res = await axios.post('http://quizmastershub.duckdns.org/api/admin/login/', {
         name,
         password,
       });

@@ -13,7 +13,7 @@ const ResultsPage = () => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws/result/');
+    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/result/');
     
     ws.onopen = () => {
       console.log('Connected to results WebSocket');

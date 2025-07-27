@@ -14,7 +14,7 @@ const GetReady = () => {
   const { aname, adminId, setAdminId } = useContext(AdminContext);
 
   useEffect(() => {
-    socket.current = new WebSocket("ws://localhost:8000/ws/chat/");
+    socket.current = new WebSocket("ws://quizmastershub.duckdns.org/ws/chat/");
 
     socket.current.onopen = () => {
       console.log("✅ WebSocket connected");

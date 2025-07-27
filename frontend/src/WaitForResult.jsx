@@ -10,7 +10,7 @@ const WaitForResult = () => {
 
   // WebSocket connection and message handling
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws/result/');
+    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/result/');
     
     ws.onopen = () => {
       console.log('Connected to results WebSocket');
@@ -33,7 +33,7 @@ const WaitForResult = () => {
   // Fetch results from API
   const fetchResults = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/users/");
+      const response = await axios.get("http://quizmastershub.duckdns.org/users/");
       const sortedResults = [...response.data].sort((a, b) => b.score - a.score);
       setResults(sortedResults);
     } catch (error) {

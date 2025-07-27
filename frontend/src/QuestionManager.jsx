@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AdminContext } from './AdminProvider';
 
-const API_BASE = 'http://localhost:8000/questions/';
+const API_BASE = 'http://quizmastershub.duckdns.org/questions/';
 
 const QuestionManager = () => {
   const { adminId, setQTime } = useContext(AdminContext);

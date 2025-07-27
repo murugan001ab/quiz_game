@@ -40,7 +40,7 @@ const NewQuiz = () => {
 
   // WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws/index/');
+    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/index/');
 
     ws.onopen = () => {
       console.log('WebSocket Connected');

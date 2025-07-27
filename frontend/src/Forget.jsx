@@ -14,7 +14,7 @@ const ResetPassword = () => {
         e.preventDefault();
 
         try {
-            const res = await axios.post('http://localhost:8000/api/admin/forgot-password/', {
+            const res = await axios.post('http://quizmastershub.duckdns.org/api/admin/forgot-password/', {
                 name: formData.name,
                 new_password: formData.newPassword
             });
