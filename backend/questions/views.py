@@ -9,14 +9,25 @@ class UserCreateView(APIView):
     """Save user name & score"""
 
     def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+        admin_id = request.query_params.get('admin_id')
+        if admin_id:
+            users = User.objects.filter(admin_id=admin_id).order_by('-score')
+        else:
+            users = User.objects.all().order_by('-score')
+        
+        data = [{
+            'name': user.aname,
+            'score': user.score
+        } for user in users]
+        
+        return Response(data)
     def post(self, request):    
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        print(request.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class QuizQuestionListCreate(APIView):

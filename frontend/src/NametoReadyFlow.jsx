@@ -6,9 +6,11 @@ import { AdminContext } from './AdminProvider';
 const GetReady = () => {
   const socket = useRef(null);
   const navigate = useNavigate();
-  const [ isShowing, setIsShowing ] = useState(false);
+  const [isShowing, setIsShowing] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
-
+  
+  // Get all needed values from context
+  const { aname, adminId, setAdminId } = useContext(AdminContext);
 
   useEffect(() => {
     socket.current = new WebSocket("ws://localhost:8000/ws/chat/");
@@ -21,10 +23,15 @@ const GetReady = () => {
     socket.current.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log("Received message:", data);
 
-        console.log("Received message:", data,data.show);
+        // Always update admin ID if it's in the message
+        if (data.adminid) {
+          setAdminId(data.adminid);
+          console.log("Admin ID updated in context");
+        }
 
-        if (data.show==true && data.action == 'start') {
+        if (data.show === true && data.action === 'start') {
           console.log("Quiz is starting...");
           setIsShowing(true);
         }
@@ -48,23 +55,30 @@ const GetReady = () => {
         socket.current.close();
       }
     };
-  }, [isShowing]);
+  }, []); // Empty dependency array to run only once
+
+  // Add useEffect to log adminId changes
+  useEffect(() => {
+    console.log("Current adminId:", adminId);
+  }, [adminId]);
 
   return (
     <>
       {isShowing ? (
-        <QuizPage name={name} />
+        <QuizPage name={aname} />
       ) : (
         <div style={styles.container}>
-          <h2 style={styles.title}>Get Ready, {name}!</h2>
+          <h2 style={styles.title}>Get Ready, {aname}!</h2>
           <p style={styles.message}>The quiz will start soon...</p>
           <p>Connection status: {connectionStatus}</p>
+          <p>Admin ID: {adminId || 'Not set yet'}</p>
           <div style={styles.loader}></div>
         </div>
       )}
     </>
   );
 };
+
 
 // ... (rest of your NameToReadyFlow component remains the same)
 const styles = {

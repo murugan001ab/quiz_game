@@ -18,7 +18,7 @@ class Admin(models.Model):
         return self.name
 
 class User(models.Model):
-    name = models.CharField(max_length=100)
+    aname = models.CharField(max_length=100)
     score = models.IntegerField(default=0)  # Store quiz score
     admin_id=models.CharField(max_length=100)
 

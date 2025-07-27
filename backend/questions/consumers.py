@@ -43,13 +43,15 @@ class QuizControlConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+
+        adminid = data.get("adminid", "")
         await self.channel_layer.group_send(
             "quiz_control_group",
             {
                 "type": "quiz_control",
                 "show": data.get("show", False),
                 "action": data.get("action", ""),
-                "adminid":data.get("adminid")
+                "adminid":adminid
             }
         )
 

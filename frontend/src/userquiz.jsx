@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { index, setIndex, name, adminId } = useContext(AdminContext);
+  const { index, setIndex, aname, adminId } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [timer, setTimer] = useState(15);
@@ -15,6 +15,7 @@ const QuizPage = () => {
   const [timeExpired, setTimeExpired] = useState(false);
   const [showFinishButton, setShowFinishButton] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -118,12 +119,15 @@ const QuizPage = () => {
 
   const handleQuizFinished = () => {
 
-    console.log("Quiz finished. Final score:", score,name,adminId);
+    const admin_id=adminId;
+    const name=aname;
+
+    console.log("Quiz finished. Final score:", score,aname,adminId);
     // Submit score to backend
     axios.post("http://localhost:8000/users/", {
       name,
       score,
-      adminId
+      admin_id
     })
     .then(() => {
       navigate('/wait');

@@ -9,11 +9,11 @@ import { useNavigate } from 'react-router-dom';
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
-
+      const { setAdminId, setIsLogin } = useContext(AdminContext);
     const navigate = useNavigate();
 
 
-      const { setAdminId } = useContext(AdminContext);
+      // const { setAdminId } = useContext(AdminContext);
 
     const handleLogin = async (e) => {
       e.preventDefault();
@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom';
           // You can store token in localStorage or redirect to dashboard
           // localStorage.setItem('token', res.data.token);
           setAdminId(res.data.admin_id)
+          setIsLogin(true);
 
           console.log(res.data.admin_id)
 

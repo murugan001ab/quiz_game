@@ -5,14 +5,14 @@ import { AdminContext } from "./AdminProvider";
 function NameGet() {
     // const [name, setName] = useState("");
     const navigate = useNavigate();
-    const {name,setName}=useContext(AdminContext);
+    const {aname,setName}=useContext(AdminContext);
 
     const handleNext = () => {
-        if (name.trim()) {
+        if (aname.trim()) {
             // Optionally, save the name to context or localStorage here
             navigate("/readyquiz");
 
-            setName(name); // Save name to context for later use
+            setName(aname); // Save name to context for later use
 
         }
     };
@@ -22,7 +22,7 @@ function NameGet() {
             <h2>Enter your name</h2>
             <input
                 type="text"
-                value={name}
+                value={aname}
                 onChange={e => setName(e.target.value)}
                 placeholder="Your name"
                 style={{ padding: "0.5rem", width: "80%" }}
@@ -30,7 +30,7 @@ function NameGet() {
             <br />
             <button
                 onClick={handleNext}
-                disabled={!name.trim()}
+                disabled={!aname.trim()}
                 style={{ marginTop: "1rem", padding: "0.5rem 1.5rem" }}
             >
                 Next
