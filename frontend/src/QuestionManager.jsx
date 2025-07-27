@@ -7,6 +7,9 @@ const API_BASE = 'http://localhost:8000/questions/';
 const QuestionManager = () => {
   const { adminId, setQTime } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
+  const [filteredQuestions, setFilteredQuestions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     question_text: '',
     options: ['', '', '', ''],
@@ -21,9 +24,18 @@ const QuestionManager = () => {
     fetchQuestions();
   }, []);
 
+  useEffect(() => {
+    const results = questions.filter(question =>
+      question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      question.discription.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredQuestions(results);
+  }, [searchTerm, questions]);
+
   const fetchQuestions = async () => {
     const res = await axios.get(API_BASE);
     setQuestions(res.data);
+    setFilteredQuestions(res.data);
   };
 
   const handleInputChange = (e) => {
@@ -49,18 +61,23 @@ const QuestionManager = () => {
         await axios.post(API_BASE, payload);
       }
       fetchQuestions();
-      setForm({
-        question_text: '',
-        options: ['', '', '', ''],
-        correct_answer: '',
-        status: 'not answered',
-        admin: adminId,
-        discription: ''
-      });
-      setEditingId(null);
+      resetForm();
+      setShowModal(false);
     } catch (err) {
       alert('Error: ' + err.message);
     }
+  };
+
+  const resetForm = () => {
+    setForm({
+      question_text: '',
+      options: ['', '', '', ''],
+      correct_answer: '',
+      status: 'not answered',
+      admin: adminId,
+      discription: ''
+    });
+    setEditingId(null);
   };
 
   const handleEdit = (q) => {
@@ -73,6 +90,7 @@ const QuestionManager = () => {
       admin: q.admin,
       discription: q.discription,
     });
+    setShowModal(true);
   };
 
   const handleDelete = async (id) => {
@@ -83,255 +101,481 @@ const QuestionManager = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.formContainer}>
-        <h2 style={styles.heading}>{editingId ? 'Update Question' : 'Create New Question'}</h2>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Question Text:</label>
+    <div className="question-manager-container">
+      <div className="question-manager-header">
+        <h2>Question Manager</h2>
+        <div className="search-add-container">
+          <div className="search-box">
             <input
               type="text"
-              name="question_text"
-              placeholder="Enter your question here"
-              value={form.question_text}
-              onChange={handleInputChange}
-              required
-              style={styles.input}
+              placeholder="Search questions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
+            <i className="search-icon">🔍</i>
           </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Options:</label>
-            {form.options.map((opt, index) => (
-              <input
-                key={index}
-                type="text"
-                placeholder={`Option ${index + 1}`}
-                value={opt}
-                onChange={(e) => handleOptionChange(index, e.target.value)}
-                required
-                style={styles.input}
-              />
-            ))}
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Correct Answer:</label>
-            <input
-              type="text"
-              name="correct_answer"
-              placeholder="Enter correct answer"
-              value={form.correct_answer}
-              onChange={handleInputChange}
-              required
-              style={styles.input}
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Status:</label>
-            <select 
-              name="status" 
-              value={form.status} 
-              onChange={handleInputChange}
-              style={styles.select}
-            >
-              <option value="not answered">Not Answered</option>
-              <option value="answered">Answered</option>
-              <option value="skipped">Skipped</option>
-            </select>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Description:</label>
-            <textarea 
-              name="discription" 
-              placeholder="Enter question description"
-              value={form.discription} 
-              onChange={handleInputChange}
-              style={styles.textarea}
-            />
-          </div>
-
-          <button type="submit" style={styles.submitButton}>
-            {editingId ? 'Update Question' : 'Create Question'}
+          <button 
+            className="add-question-btn"
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
+          >
+            + Add Question
           </button>
-        </form>
-      </div>
-
-      <div style={styles.questionsContainer}>
-        <h2 style={styles.heading}>All Questions</h2>
-        <div style={styles.questionsList}>
-          {questions.map(q => (
-            <div key={q.id} style={styles.questionCard}>
-              <h3 style={styles.questionText}>{q.question_text}</h3>
-              <p style={styles.questionDetail}><strong>Options:</strong> {q.options.join(', ')}</p>
-              <p style={styles.questionDetail}><strong>Answer:</strong> {q.correct_answer}</p>
-              <p style={styles.questionDetail}><strong>Status:</strong> {q.status}</p>
-              <p style={styles.questionDetail}><strong>Description:</strong> {q.discription}</p>
-              <div style={styles.buttonGroup}>
-                <button 
-                  onClick={() => handleEdit(q)} 
-                  style={styles.editButton}
-                >
-                  Edit
-                </button>
-                <button 
-                  onClick={() => handleDelete(q.id)} 
-                  style={styles.deleteButton}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
+
+      <div className="questions-grid">
+        {filteredQuestions.map(q => (
+          <div key={q.id} className="question-card">
+            <h3>{q.question_text}</h3>
+            <div className="question-details">
+              <p><strong>Options:</strong> {q.options.join(', ')}</p>
+              <p><strong>Answer:</strong> {q.correct_answer}</p>
+              <p><strong>Status:</strong> <span className={`status-${q.status.replace(' ', '')}`}>{q.status}</span></p>
+              {q.discription && <p><strong>Description:</strong> {q.discription}</p>}
+            </div>
+            <div className="question-actions">
+              <button 
+                className="edit-btn"
+                onClick={() => handleEdit(q)}
+              >
+                Edit
+              </button>
+              <button 
+                className="delete-btn"
+                onClick={() => handleDelete(q.id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>{editingId ? 'Update Question' : 'Create New Question'}</h3>
+              <button 
+                className="close-modal"
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                }}
+              >
+                &times;
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="question-form">
+              <div className="form-group">
+                <label>Question Text</label>
+                <input
+                  type="text"
+                  name="question_text"
+                  placeholder="Enter your question here"
+                  value={form.question_text}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Options</label>
+                {form.options.map((opt, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    placeholder={`Option ${index + 1}`}
+                    value={opt}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    required
+                  />
+                ))}
+              </div>
+
+              <div className="form-group">
+                <label>Correct Answer</label>
+                <input
+                  type="text"
+                  name="correct_answer"
+                  placeholder="Enter correct answer"
+                  value={form.correct_answer}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Status</label>
+                <select 
+                  name="status" 
+                  value={form.status} 
+                  onChange={handleInputChange}
+                >
+                  <option value="not answered">Not Answered</option>
+                  <option value="answered">Answered</option>
+                  <option value="skipped">Skipped</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Description</label>
+                <textarea 
+                  name="discription" 
+                  placeholder="Enter question description"
+                  value={form.discription} 
+                  onChange={handleInputChange}
+                  rows="3"
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="submit-btn">
+                  {editingId ? 'Update Question' : 'Create Question'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        .question-manager-container {
+          padding: 30px;
+          max-width: 1200px;
+          margin: 0 auto;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .question-manager-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 30px;
+          flex-wrap: wrap;
+          gap: 20px;
+        }
+
+        .question-manager-header h2 {
+          color: #2c3e50;
+          font-size: 28px;
+          margin: 0;
+        }
+
+        .search-add-container {
+          display: flex;
+          gap: 15px;
+          align-items: center;
+        }
+
+        .search-box {
+          position: relative;
+        }
+
+        .search-box input {
+          padding: 10px 15px 10px 35px;
+          border: 1px solid #dfe6e9;
+          border-radius: 8px;
+          font-size: 14px;
+          width: 250px;
+          transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #7f8c8d;
+        }
+
+        .add-question-btn {
+          background: #3498db;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .add-question-btn:hover {
+          background: #2980b9;
+          transform: translateY(-2px);
+        }
+
+        .questions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
+        }
+
+        .question-card {
+          background: white;
+          border-radius: 10px;
+          padding: 20px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          transition: all 0.3s;
+        }
+
+        .question-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-card h3 {
+          color: #2c3e50;
+          margin-top: 0;
+          margin-bottom: 15px;
+          font-size: 18px;
+        }
+
+        .question-details {
+          color: #7f8c8d;
+          font-size: 14px;
+          margin-bottom: 15px;
+        }
+
+        .question-details p {
+          margin: 5px 0;
+        }
+
+        .status-notanswered {
+          color: #e74c3c;
+        }
+
+        .status-answered {
+          color: #2ecc71;
+        }
+
+        .status-skipped {
+          color: #f39c12;
+        }
+
+        .question-actions {
+          display: flex;
+          gap: 10px;
+          margin-top: 15px;
+        }
+
+        .edit-btn, .delete-btn {
+          padding: 8px 15px;
+          border: none;
+          border-radius: 5px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.3s;
+          flex: 1;
+        }
+
+        .edit-btn {
+          background: #f39c12;
+          color: white;
+        }
+
+        .edit-btn:hover {
+          background: #e67e22;
+        }
+
+        .delete-btn {
+          background: #e74c3c;
+          color: white;
+        }
+
+        .delete-btn:hover {
+          background: #c0392b;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+
+        .modal-content {
+          background: white;
+          border-radius: 10px;
+          width: 90%;
+          max-width: 600px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px;
+          border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h3 {
+          margin: 0;
+          color: #2c3e50;
+        }
+
+        .close-modal {
+          background: none;
+          border: none;
+          font-size: 24px;
+          cursor: pointer;
+          color: #7f8c8d;
+          transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+          color: #e74c3c;
+        }
+
+        .question-form {
+          padding: 20px;
+        }
+
+        .form-group {
+          margin-bottom: 20px;
+        }
+
+        .form-group label {
+          display: block;
+          margin-bottom: 8px;
+          color: #2c3e50;
+          font-weight: 600;
+          font-size: 14px;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #dfe6e9;
+          border-radius: 5px;
+          font-size: 14px;
+          transition: all 0.3s;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-group textarea {
+          min-height: 80px;
+          resize: vertical;
+        }
+
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 20px;
+        }
+
+        .cancel-btn, .submit-btn {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+
+        .cancel-btn {
+          background: #95a5a6;
+          color: white;
+        }
+
+        .cancel-btn:hover {
+          background: #7f8c8d;
+        }
+
+        .submit-btn {
+          background: #2ecc71;
+          color: white;
+        }
+
+        .submit-btn:hover {
+          background: #27ae60;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+          .question-manager-header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .search-add-container {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .search-box input {
+            width: 100%;
+          }
+
+          .add-question-btn {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .questions-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .modal-content {
+            width: 95%;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .question-manager-container {
+            padding: 15px;
+          }
+
+          .form-actions {
+            flex-direction: column;
+          }
+
+          .cancel-btn, .submit-btn {
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-    backgroundColor: '#f5f7fa',
-    padding: '20px',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-  },
-  formContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: '10px',
-    padding: '25px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    marginBottom: '30px'
-  },
-  questionsContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: '10px',
-    padding: '25px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-  },
-  heading: {
-    color: '#2c3e50',
-    marginBottom: '20px',
-    fontSize: '24px',
-    borderBottom: '2px solid #3498db',
-    paddingBottom: '10px'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '15px'
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '5px'
-  },
-  label: {
-    color: '#34495e',
-    fontWeight: '600',
-    fontSize: '14px'
-  },
-  input: {
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ddd',
-    fontSize: '14px',
-    transition: 'border 0.3s',
-    outline: 'none',
-    ':focus': {
-      border: '1px solid #3498db'
-    }
-  },
-  select: {
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ddd',
-    fontSize: '14px',
-    backgroundColor: 'white'
-  },
-  textarea: {
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ddd',
-    fontSize: '14px',
-    minHeight: '80px',
-    resize: 'vertical'
-  },
-  submitButton: {
-    backgroundColor: '#3498db',
-    color: 'white',
-    padding: '12px 20px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    transition: 'background-color 0.3s',
-    ':hover': {
-      backgroundColor: '#2980b9'
-    }
-  },
-  questionsList: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '20px',
-    marginTop: '20px'
-  },
-  questionCard: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-    transition: 'transform 0.2s',
-    ':hover': {
-      transform: 'translateY(-5px)'
-    }
-  },
-  questionText: {
-    color: '#2c3e50',
-    marginBottom: '10px',
-    fontSize: '18px'
-  },
-  questionDetail: {
-    color: '#7f8c8d',
-    margin: '5px 0',
-    fontSize: '14px'
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '10px',
-    marginTop: '15px'
-  },
-  editButton: {
-    backgroundColor: '#f39c12',
-    color: 'white',
-    padding: '8px 15px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    transition: 'background-color 0.3s',
-    ':hover': {
-      backgroundColor: '#e67e22'
-    }
-  },
-  deleteButton: {
-    backgroundColor: '#e74c3c',
-    color: 'white',
-    padding: '8px 15px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    transition: 'background-color 0.3s',
-    ':hover': {
-      backgroundColor: '#c0392b'
-    }
-  }
 };
 
 export default QuestionManager;

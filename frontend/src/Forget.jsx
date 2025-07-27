@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const ResetPassword = () => {
-    const [name, setName] = useState('');
-    const [newPassword, setNewPassword] = useState('');
+    const [formData, setFormData] = useState({ name: '', newPassword: '' });
     const [message, setMessage] = useState('');
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleReset = async (e) => {
         e.preventDefault();
 
         try {
             const res = await axios.post('http://localhost:8000/api/admin/forgot-password/', {
-                name: name,
-                new_password: newPassword
+                name: formData.name,
+                new_password: formData.newPassword
             });
             setMessage(res.data.message);
+            setFormData({ name: '', newPassword: '' });
         } catch (error) {
             if (error.response) {
                 setMessage(error.response.data.error);
@@ -25,20 +30,200 @@ const ResetPassword = () => {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: 'auto' }}>
-            <h2>Reset Password</h2>
-            <form onSubmit={handleReset}>
-                <div>
-                    <label>Username</label><br />
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+        <div className="admin-create-container">
+            <div className="admin-create-card">
+                <div className="admin-create-header">
+                    <h2>Reset Password</h2>
+                    {/* <div className="admin-logo">A+</div> */}
                 </div>
-                <div>
-                    <label>New Password</label><br />
-                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                
+                <form onSubmit={handleReset} className="admin-create-form">
+                    <div className="form-group">
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Admin Name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <input
+                            type="password"
+                            name="newPassword"
+                            placeholder="New Password"
+                            value={formData.newPassword}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    
+                    <button type="submit" className="create-button">Reset Password</button>
+                    
+                    {message && (
+                        <div className={`message ${message.includes('success') ? 'success' : 'error'}`}>
+                            {message}
+                        </div>
+                    )}
+                </form>
+                
+                <div className="admin-create-links">
+                    <Link to="/admin" className="link">Back to Login</Link>
                 </div>
-                <button type="submit">Reset Password</button>
-            </form>
-            {message && <p>{message}</p>}
+            </div>
+
+            <style jsx>{`
+                .admin-create-container {
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                    padding: 20px;
+                }
+                
+                .admin-create-card {
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                    padding: 40px;
+                    width: 100%;
+                    max-width: 400px;
+                    text-align: center;
+                }
+                
+                .admin-create-header {
+                    margin-bottom: 30px;
+                    position: relative;
+                }
+                
+                .admin-create-header h2 {
+                    color: #2c3e50;
+                    margin-bottom: 10px;
+                    font-size: 24px;
+                }
+                
+                .admin-logo {
+                    width: 60px;
+                    height: 60px;
+                    margin: 0 auto 20px;
+                    background: #3498db;
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 28px;
+                    font-weight: bold;
+                    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+                }
+                
+                .admin-create-form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+                
+                .form-group {
+                    text-align: left;
+                }
+                
+                .form-group input {
+                    width: 100%;
+                    padding: 12px 15px;
+                    border: 1px solid #dfe6e9;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    transition: all 0.3s;
+                    box-sizing: border-box;
+                }
+                
+                .form-group input:focus {
+                    outline: none;
+                    border-color: #3498db;
+                    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+                }
+                
+                .create-button {
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    padding: 12px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    margin-top: 10px;
+                }
+                
+                .create-button:hover {
+                    background: #2980b9;
+                    transform: translateY(-2px);
+                }
+                
+                .message {
+                    padding: 10px;
+                    border-radius: 5px;
+                    margin-top: 15px;
+                    font-size: 14px;
+                }
+                
+                .message.success {
+                    background: #d4edda;
+                    color: #155724;
+                }
+                
+                .message.error {
+                    background: #f8d7da;
+                    color: #721c24;
+                }
+                
+                .admin-create-links {
+                    margin-top: 25px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                
+                .link {
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 14px;
+                    transition: color 0.3s;
+                }
+                
+                .link:hover {
+                    color: #2980b9;
+                    text-decoration: underline;
+                }
+                
+                /* Responsive styles */
+                @media (max-width: 480px) {
+                    .admin-create-card {
+                        padding: 30px 20px;
+                    }
+                    
+                    .admin-create-header h2 {
+                        font-size: 20px;
+                    }
+                    
+                    .admin-logo {
+                        width: 50px;
+                        height: 50px;
+                        font-size: 24px;
+                    }
+                    
+                    .form-group input {
+                        padding: 10px 12px;
+                    }
+                    
+                    .create-button {
+                        padding: 10px;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

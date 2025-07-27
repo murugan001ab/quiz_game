@@ -14,7 +14,7 @@ function QRCodeGenerator() {
     }}>
       <QRCodeCanvas 
         value={data} 
-        size={400}
+        size={280}
         level="H"
         fgColor="#2c3e50"
         bgColor="#ffffff"

@@ -1,99 +1,236 @@
-  import React, { useState,useContext } from 'react';
-  import axios from 'axios';
-  import { AdminContext } from './AdminProvider';
+import React, { useState, useContext } from 'react';
+import axios from 'axios';
+import { AdminContext } from './AdminProvider';
 import { Link } from 'react-router-dom';
-
 import { useNavigate } from 'react-router-dom';
 
-  const AdminLogin = () => {
-    const [name, setName] = useState('');
-    const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
-      const { setAdminId, setIsLogin } = useContext(AdminContext);
-    const navigate = useNavigate();
+const AdminLogin = () => {
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const { setAdminId, setIsLogin } = useContext(AdminContext);
+  const navigate = useNavigate();
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-      // const { setAdminId } = useContext(AdminContext);
-
-    const handleLogin = async (e) => {
-      e.preventDefault();
-
-      try {
-        const res = await axios.post('http://localhost:8000/api/admin/login/', {
-          name,
-          password,
-        });
-        
-        if (res.data.message=="Login successful") {
-          setMessage('Login successful!');
-          // You can store token in localStorage or redirect to dashboard
-          // localStorage.setItem('token', res.data.token);
-          setAdminId(res.data.admin_id)
-          setIsLogin(true);
-
-          console.log(res.data.admin_id)
-
-          navigate('/admin/dashboard'); // Redirect to admin dashboard
-
-
-
-          
-        
-        } else {
-          setMessage('Invalid credentials');
-        }
-      } catch (error) {
-        console.error(error);
-        setMessage('Login failed!');
+    try {
+      const res = await axios.post('http://localhost:8000/api/admin/login/', {
+        name,
+        password,
+      });
+      
+      if (res.data.message == "Login successful") {
+        setMessage('Login successful!');
+        setAdminId(res.data.admin_id);
+        setIsLogin(true);
+        console.log(res.data.admin_id);
+        navigate('/admin/dashboard');
+      } else {
+        setMessage('Invalid credentials');
       }
-    };
+    } catch (error) {
+      console.error(error);
+      setMessage('Login failed!');
+    }
+  };
 
-    return (
-      <div style={styles.container}>
-        <h2>Admin Login</h2>
-        <form onSubmit={handleLogin} style={styles.form}>
-          <input
-            type="text"
-            placeholder="Admin Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={styles.input}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-            required
-          />
-          <button type="submit" style={styles.button}>Login</button>
+  return (
+    <div className="admin-login-container">
+      <div className="admin-login-card">
+        <div className="admin-login-header">
+          <h2>Admin Login</h2>
+          {/* <div className="admin-logo">A</div> */}
+        </div>
+        
+        <form onSubmit={handleLogin} className="admin-login-form">
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Admin Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <button type="submit" className="login-button">Login</button>
+          
+          {message && (
+            <div className={`message ${message.includes('success') ? 'success' : 'error'}`}>
+              {message}
+            </div>
+          )}
         </form>
-        <Link to="/admin/create" >create new accound</Link>
-        <Link to="/forget" >forget password?</Link>
-        <p>{message}</p>
+        
+        <div className="admin-login-links">
+          <Link to="/admin/create" className="link">Create new account</Link>
+          <Link to="/forget" className="link">Forgot password?</Link>
+        </div>
       </div>
-    );
-  };
 
-  const styles = {
-    container: {
-      marginTop: '100px',
-      textAlign: 'center',
-    },
-    form: {
-      display: 'inline-block',
-      flexDirection: 'column',
-    },
-    input: {
-      padding: '10px',
-      margin: '10px',
-      width: '200px',
-    },
-    button: {
-      padding: '10px 20px',
-    },
-  };
+      <style jsx>{`
+        .admin-login-container {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          padding: 20px;
+        }
+        
+        .admin-login-card {
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          padding: 40px;
+          width: 100%;
+          max-width: 400px;
+          text-align: center;
+        }
+        
+        .admin-login-header {
+          margin-bottom: 30px;
+          position: relative;
+        }
+        
+        .admin-login-header h2 {
+          color: #2c3e50;
+          margin-bottom: 10px;
+          font-size: 24px;
+        }
+        
+        .admin-logo {
+          width: 60px;
+          height: 60px;
+          margin: 0 auto 20px;
+          background: #3498db;
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 28px;
+          font-weight: bold;
+          box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .admin-login-form {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .form-group {
+          text-align: left;
+        }
+        
+        .form-group input {
+          width: 100%;
+          padding: 12px 15px;
+          border: 1px solid #dfe6e9;
+          border-radius: 8px;
+          font-size: 16px;
+          transition: all 0.3s;
+          box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .login-button {
+          background: #3498db;
+          color: white;
+          border: none;
+          padding: 12px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          margin-top: 10px;
+        }
+        
+        .login-button:hover {
+          background: #2980b9;
+          transform: translateY(-2px);
+        }
+        
+        .message {
+          padding: 10px;
+          border-radius: 5px;
+          margin-top: 15px;
+          font-size: 14px;
+        }
+        
+        .message.success {
+          background: #d4edda;
+          color: #155724;
+        }
+        
+        .message.error {
+          background: #f8d7da;
+          color: #721c24;
+        }
+        
+        .admin-login-links {
+          margin-top: 25px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .link {
+          color: #3498db;
+          text-decoration: none;
+          font-size: 14px;
+          transition: color 0.3s;
+        }
+        
+        .link:hover {
+          color: #2980b9;
+          text-decoration: underline;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 480px) {
+          .admin-login-card {
+            padding: 30px 20px;
+          }
+          
+          .admin-login-header h2 {
+            font-size: 20px;
+          }
+          
+          .admin-logo {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+          }
+          
+          .form-group input {
+            padding: 10px 12px;
+          }
+          
+          .login-button {
+            padding: 10px;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
 
-  export default AdminLogin;
+export default AdminLogin;
