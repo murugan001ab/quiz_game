@@ -1,8 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { AdminContext } from './AdminProvider';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const AdminLogin = () => {
   const [name, setName] = useState('');
@@ -10,6 +9,18 @@ const AdminLogin = () => {
   const [message, setMessage] = useState('');
   const { setAdminId, setIsLogin } = useContext(AdminContext);
   const navigate = useNavigate();
+
+  // Check for existing session on component mount
+  useEffect(() => {
+    const storedAdminId = localStorage.getItem('adminId');
+    const storedExpiry = localStorage.getItem('adminSessionExpiry');
+    
+    if (storedAdminId && storedExpiry && new Date().getTime() < parseInt(storedExpiry)) {
+      setAdminId(storedAdminId);
+      setIsLogin(true);
+      navigate('/admin/dashboard');
+    }
+  }, [setAdminId, setIsLogin, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,11 +31,16 @@ const AdminLogin = () => {
         password,
       });
       
-      if (res.data.message == "Login successful") {
+      if (res.data.message === "Login successful") {
         setMessage('Login successful!');
+        
+        // Set session in localStorage (24 hours expiry)
+        const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000); // 24 hours from now
+        localStorage.setItem('adminId', res.data.admin_id);
+        localStorage.setItem('adminSessionExpiry', expiryTime.toString());
+        
         setAdminId(res.data.admin_id);
         setIsLogin(true);
-        console.log(res.data.admin_id);
         navigate('/admin/dashboard');
       } else {
         setMessage('Invalid credentials');
@@ -40,7 +56,6 @@ const AdminLogin = () => {
       <div className="admin-login-card">
         <div className="admin-login-header">
           <h2>Admin Login</h2>
-          {/* <div className="admin-logo">A</div> */}
         </div>
         
         <form onSubmit={handleLogin} className="admin-login-form">
@@ -107,21 +122,6 @@ const AdminLogin = () => {
           color: #2c3e50;
           margin-bottom: 10px;
           font-size: 24px;
-        }
-        
-        .admin-logo {
-          width: 60px;
-          height: 60px;
-          margin: 0 auto 20px;
-          background: #3498db;
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 28px;
-          font-weight: bold;
-          box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
         }
         
         .admin-login-form {
@@ -212,12 +212,6 @@ const AdminLogin = () => {
           
           .admin-login-header h2 {
             font-size: 20px;
-          }
-          
-          .admin-logo {
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
           }
           
           .form-group input {
