@@ -15,6 +15,7 @@ import NewQuiz from './Newquiz';
 import QuizStartPage from './StartQuiz';
 import WaitForResult from './WaitForResult';
 import ShowResults from './ShowResults';
+import GetReadyPage from './GetReadyPage';
 
 
 
@@ -41,6 +42,7 @@ function App() {
   <Route path="/admin/start-quiz" element={<QuizStartPage />} />
   <Route path="/wait" element={<WaitForResult />} />
   <Route path="/results" element={<ShowResults />} />  
+  <Route path="/ready" element={<GetReadyPage />} />
   </Routes>
   </Router>
   </AdminProvider> 
