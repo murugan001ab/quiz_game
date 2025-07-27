@@ -142,12 +142,12 @@ const WaitForResult = () => {
           </div>
           
           <div style={styles.actions}>
-            <button 
+            {/* <button 
               onClick={() => navigate('/quiz')}
               style={styles.backButton}
             >
               Back to Quiz
-            </button>
+            </button> */}
           </div>
         </div>
       )}
