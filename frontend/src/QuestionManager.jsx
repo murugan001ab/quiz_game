@@ -17,10 +17,10 @@ const QuestionManager = () => {
     correct_answer: '',
     status: 'not answered',
     admin: null,
-    description: "", // Fixed typo from discription
+    description: "",
   });
   const [editingId, setEditingId] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Get adminId from localStorage when component mounts
@@ -33,7 +33,7 @@ const QuestionManager = () => {
         admin: storedAdminId
       }));
     } else {
-      alert('Admin not logged in');
+      setError('Admin not logged in');
     }
   }, []);
 
@@ -46,52 +46,56 @@ const QuestionManager = () => {
       setError(null);
       try {
         const response = await axios.get(`${API_BASE}${adminId}/`);
-        setQuestions(response.data);
-        setFilteredQuestions(response.data);
+        
+        // Ensure we're working with an array
+        const questionsData = Array.isArray(response?.data) ? response.data : [];
+        
+        setQuestions(questionsData);
+        setFilteredQuestions(questionsData);
       } catch (err) {
-        setError('Failed to load questions');
-        console.error('Error:', err.response?.data || err.message);
+        setError(err.response?.data?.message || 'Failed to load questions');
+        console.error('Error:', err);
       } finally {
         setLoading(false);
       }
     };
     
     fetchQuestions();
-  }, [adminId]); // Add adminId as dependency
+  }, [adminId]);
 
-
-
-
-
-
+  // Filter questions based on search term
   useEffect(() => {
+    if (!searchTerm) {
+      setFilteredQuestions(questions);
+      return;
+    }
+
     const results = questions.filter(question =>
-      question.question_text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      question.discription.toLowerCase().includes(searchTerm.toLowerCase())
+      (question.question_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      question.description?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredQuestions(results);
   }, [searchTerm, questions]);
 
-  const fetchQuestions = async () => {
-    const res = await axios.get(`${API_BASE}${adminId}/`);
-    setQuestions(res.data);
-    setFilteredQuestions(res.data);
-  };
-
   const handleInputChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleOptionChange = (index, value) => {
     const newOptions = [...form.options];
     newOptions[index] = value;
-    setForm({ ...form, options: newOptions });
+    setForm(prev => ({ ...prev, options: newOptions }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     const payload = {
       ...form,
+      options: form.options.filter(opt => opt.trim() !== '') // Remove empty options
     };
 
     try {
@@ -100,11 +104,16 @@ const QuestionManager = () => {
       } else {
         await axios.post(API_BASE, payload);
       }
-      fetchQuestions();
+      // Refresh questions after successful operation
+      const response = await axios.get(`${API_BASE}${adminId}/`);
+      setQuestions(Array.isArray(response?.data) ? response.data : []);
       resetForm();
       setShowModal(false);
     } catch (err) {
-      alert('Error: ' + err.message);
+      setError(err.response?.data?.message || 'Operation failed');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,33 +124,45 @@ const QuestionManager = () => {
       correct_answer: '',
       status: 'not answered',
       admin: adminId,
-      discription: ''
+      description: ''
     });
     setEditingId(null);
   };
 
-  const handleEdit = (q) => {
-    setEditingId(q.id);
+  const handleEdit = (question) => {
+    setEditingId(question.id);
     setForm({
-      question_text: q.question_text,
-      options: q.options,
-      correct_answer: q.correct_answer,
-      status: q.status,
-      admin: q.admin,
-      discription: q.discription,
+      question_text: question.question_text || '',
+      options: Array.isArray(question.options) ? 
+        [...question.options] : 
+        ['', '', '', ''],
+      correct_answer: question.correct_answer || '',
+      status: question.status || 'not answered',
+      admin: question.admin || adminId,
+      description: question.description || ''
     });
     setShowModal(true);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this question?')) {
-      await axios.delete(`${API_BASE}${id}/${adminId}/`);
-      fetchQuestions();
+      setLoading(true);
+      try {
+        await axios.delete(`${API_BASE}${id}/${adminId}/`);
+        setQuestions(prev => prev.filter(q => q.id !== id));
+      } catch (err) {
+        setError(err.response?.data?.message || 'Delete failed');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
     <div className="question-manager-container">
+      {loading && <div className="loading-indicator">Loading...</div>}
+      {error && <div className="error-message">{error}</div>}
+
       <div className="question-manager-header">
         <h2>Question Manager</h2>
         <div className="search-add-container">
@@ -160,39 +181,50 @@ const QuestionManager = () => {
               resetForm();
               setShowModal(true);
             }}
+            disabled={loading}
           >
             + Add Question
           </button>
         </div>
       </div>
 
-      <div className="questions-grid">
-        {filteredQuestions.map(q => (
-          <div key={q.id} className="question-card">
-            <h3>{q.question_text}</h3>
-            <div className="question-details">
-              <p><strong>Options:</strong> {q.options.join(', ')}</p>
-              <p><strong>Answer:</strong> {q.correct_answer}</p>
-              <p><strong>Status:</strong> <span className={`status-${q.status.replace(' ', '')}`}>{q.status}</span></p>
-              {q.discription && <p><strong>Description:</strong> {q.discription}</p>}
+      {!loading && (
+        <div className="questions-grid">
+          {filteredQuestions.length > 0 ? (
+            filteredQuestions.map(q => (
+              <div key={q.id} className="question-card">
+                <h3>{q.question_text}</h3>
+                <div className="question-details">
+                  <p><strong>Options:</strong> {q.options?.join(', ') || 'No options'}</p>
+                  <p><strong>Answer:</strong> {q.correct_answer || 'Not specified'}</p>
+                  <p><strong>Status:</strong> <span className={`status-${q.status?.replace(' ', '')}`}>{q.status}</span></p>
+                  {q.description && <p><strong>Description:</strong> {q.description}</p>}
+                </div>
+                <div className="question-actions">
+                  <button 
+                    className="edit-btn"
+                    onClick={() => handleEdit(q)}
+                    disabled={loading}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    className="delete-btn"
+                    onClick={() => handleDelete(q.id)}
+                    disabled={loading}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="no-questions">
+              {questions.length === 0 ? 'No questions available' : 'No matching questions found'}
             </div>
-            <div className="question-actions">
-              <button 
-                className="edit-btn"
-                onClick={() => handleEdit(q)}
-              >
-                Edit
-              </button>
-              <button 
-                className="delete-btn"
-                onClick={() => handleDelete(q.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </div>
+      )}
 
       {showModal && (
         <div className="modal-overlay">
@@ -205,6 +237,7 @@ const QuestionManager = () => {
                   setShowModal(false);
                   resetForm();
                 }}
+                disabled={loading}
               >
                 &times;
               </button>
@@ -212,7 +245,7 @@ const QuestionManager = () => {
             
             <form onSubmit={handleSubmit} className="question-form">
               <div className="form-group">
-                <label>Question Text</label>
+                <label>Question Text *</label>
                 <input
                   type="text"
                   name="question_text"
@@ -220,11 +253,12 @@ const QuestionManager = () => {
                   value={form.question_text}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
 
               <div className="form-group">
-                <label>Options</label>
+                <label>Options *</label>
                 {form.options.map((opt, index) => (
                   <input
                     key={index}
@@ -232,13 +266,14 @@ const QuestionManager = () => {
                     placeholder={`Option ${index + 1}`}
                     value={opt}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                    required
+                    required={index < 2} // At least 2 options required
+                    disabled={loading}
                   />
                 ))}
               </div>
 
               <div className="form-group">
-                <label>Correct Answer</label>
+                <label>Correct Answer *</label>
                 <input
                   type="text"
                   name="correct_answer"
@@ -246,15 +281,17 @@ const QuestionManager = () => {
                   value={form.correct_answer}
                   onChange={handleInputChange}
                   required
+                  disabled={loading}
                 />
               </div>
 
               <div className="form-group">
-                <label>Status</label>
+                <label>Status *</label>
                 <select 
                   name="status" 
                   value={form.status} 
                   onChange={handleInputChange}
+                  disabled={loading}
                 >
                   <option value="not answered">Not Answered</option>
                   <option value="answered">Answered</option>
@@ -265,20 +302,32 @@ const QuestionManager = () => {
               <div className="form-group">
                 <label>Description</label>
                 <textarea 
-                  name="discription" 
+                  name="description" 
                   placeholder="Enter question description"
-                  value={form.discription} 
+                  value={form.description} 
                   onChange={handleInputChange}
                   rows="3"
+                  disabled={loading}
                 />
               </div>
 
+              {error && <div className="form-error">{error}</div>}
+
               <div className="form-actions">
-                <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>
+                <button 
+                  type="button" 
+                  className="cancel-btn" 
+                  onClick={() => setShowModal(false)}
+                  disabled={loading}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="submit-btn">
-                  {editingId ? 'Update Question' : 'Create Question'}
+                <button 
+                  type="submit" 
+                  className="submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? 'Processing...' : editingId ? 'Update Question' : 'Create Question'}
                 </button>
               </div>
             </form>
@@ -287,6 +336,50 @@ const QuestionManager = () => {
       )}
 
       <style jsx>{`
+        .question-manager-container {
+          padding: 30px;
+          max-width: 1200px;
+          margin: 0 auto;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          position: relative;
+        }
+
+        .loading-indicator {
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #3498db;
+          color: white;
+          padding: 10px 20px;
+          border-radius: 5px;
+          z-index: 1000;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .error-message {
+          background: #e74c3c;
+          color: white;
+          padding: 15px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+          text-align: center;
+        }
+
+        .form-error {
+          color: #e74c3c;
+          margin-bottom: 15px;
+          font-size: 14px;
+        }
+
+        .no-questions {
+          text-align: center;
+          padding: 40px;
+          color: #7f8c8d;
+          font-size: 18px;
+          grid-column: 1 / -1;
+        }
+
         .question-manager-container {
           padding: 30px;
           max-width: 1200px;
