@@ -7,7 +7,7 @@ const NewQuiz = () => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { index, setIndex, socket, setSocket } = useContext(AdminContext);
+  const { index, setIndex, socket, setSocket,BASE_URL } = useContext(AdminContext);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
   const [timer, setTimer] = useState(0);
   const [enableNext, setEnableNext] = useState(false);
@@ -18,7 +18,7 @@ const NewQuiz = () => {
     const timerInterval = setInterval(() => {
       setTimer((prev) => {
         const newTime = prev + 1;
-        if (newTime >= 3 && !enableNext && index < questions.length - 1) {
+        if (newTime >= 0 && !enableNext && index < questions.length - 1) {
           setEnableNext(true);
         }
         if (newTime >= 3 && !enableFinish && index >= questions.length - 1) {
@@ -40,7 +40,7 @@ const NewQuiz = () => {
 
   // WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/index/');
+    const ws = new WebSocket(`ws://${BASE_URL}/ws/index/`);
 
     ws.onopen = () => {
       console.log('WebSocket Connected');
@@ -72,7 +72,7 @@ const NewQuiz = () => {
   // Fetch questions
   useEffect(() => {
     axios
-      .get('http://127.0.0.1:8000/questions/')
+      .get(`http://${BASE_URL}/questions/`)
       .then((res) => {
         setQuestions(res.data);
         setLoading(false);

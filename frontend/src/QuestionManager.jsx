@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AdminContext } from './AdminProvider';
 
-const API_BASE = 'http://quizmastershub.duckdns.org/questions/';
+
 
 const QuestionManager = () => {
-  const { setQTime } = useContext(AdminContext);
+  const { setQTime,BASE_URL } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +22,7 @@ const QuestionManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API_BASE = `http://${BASE_URL}/questions/`;
 
   // Get adminId from localStorage when component mounts
   useEffect(() => {

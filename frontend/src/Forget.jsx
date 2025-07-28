@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { AdminContext } from './AdminProvider';
 
 const ResetPassword = () => {
     const [formData, setFormData] = useState({ name: '', newPassword: '' });
     const [message, setMessage] = useState('');
+
+    const { BASE_URL } = useContext(AdminContext);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,7 +17,7 @@ const ResetPassword = () => {
         e.preventDefault();
 
         try {
-            const res = await axios.post('http://quizmastershub.duckdns.org/api/admin/forgot-password/', {
+            const res = await axios.post(`http://${BASE_URL}/api/admin/forgot-password/`, {
                 name: formData.name,
                 new_password: formData.newPassword
             });

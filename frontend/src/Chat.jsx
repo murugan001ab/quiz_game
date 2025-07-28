@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { FiSend, FiWifi, FiWifiOff } from 'react-icons/fi';
+import { AdminContext } from './AdminProvider';
 
 const ChatComponent = ({ roomName, username }) => {
   const [messages, setMessages] = useState([]);
@@ -10,9 +11,11 @@ const ChatComponent = ({ roomName, username }) => {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
+  const {BASE_URL} = useContext(AdminContext);
+
   // Reconnect logic
   const connectWebSocket = useCallback(() => {
-    const socketUrl = `ws://quizmastershub.duckdns.org/ws/chat/${encodeURIComponent(roomName)}/`;
+    const socketUrl = `ws://${BASE_URL}/ws/chat/${encodeURIComponent(roomName)}/`;
     setConnectionStatus('Connecting...');
     setError(null);
 

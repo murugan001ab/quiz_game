@@ -51,6 +51,12 @@ function App() {
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/readyquiz" element={<NameToReadyFlow />} />
           <Route path="/wait" element={<WaitForResult />} />
+           <Route path="/admin/nametoready" element={<NameGet /> } />
+           <Route path="/results" element={
+    
+              <ResultsPage />
+            
+          } />
 
           {/* Protected Admin Routes */}
           <Route path="/admin/dashboard" element={
@@ -73,16 +79,8 @@ function App() {
               <QuizStartPage />
             </ProtectedRoute>
           } />
-          <Route path="/admin/nametoready" element={
-            <ProtectedRoute>
-              <NameGet />
-            </ProtectedRoute>
-          } />
-          <Route path="/results" element={
-            <ProtectedRoute>
-              <ResultsPage />
-            </ProtectedRoute>
-          } />
+         
+          
         </Routes>
       </Router>
     </AdminProvider>

@@ -9,12 +9,13 @@ const GetReady = () => {
   const [isShowing, setIsShowing] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [countdown, setCountdown] = useState(null);
+
   
   // Get all needed values from context
-  const { aname, adminId, setAdminId } = useContext(AdminContext);
+  const { aname, adminId, setAdminId,BASE_URL } = useContext(AdminContext);
 
   useEffect(() => {
-    socket.current = new WebSocket("ws://quizmastershub.duckdns.org/ws/chat/");
+    socket.current = new WebSocket(`ws://${BASE_URL}/ws/chat/`);
 
     socket.current.onopen = () => {
       console.log("✅ WebSocket connected");

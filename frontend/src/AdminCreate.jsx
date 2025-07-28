@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { AdminContext } from "./AdminProvider";
 
 const AdminCreatePage = () => {
   const [adminData, setAdminData] = useState({ name: "", password: "" });
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
+  const {BASE_URL} = useContext(AdminContext);
 
   const handleChange = (e) => {
     setAdminData({ ...adminData, [e.target.name]: e.target.value });
@@ -27,7 +29,7 @@ const AdminCreatePage = () => {
 
     try {
       const res = await axios.post(
-        "http://quizmastershub.duckdns.org/api/admin/create/", 
+        `http://${BASE_URL}/api/admin/create/`, 
         adminData
       );
       setMessage("Admin created successfully!");

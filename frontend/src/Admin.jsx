@@ -7,7 +7,7 @@ const AdminLogin = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const { setAdminId, setIsLogin } = useContext(AdminContext);
+  const { setAdminId, setIsLogin,BASE_URL } = useContext(AdminContext);
   const navigate = useNavigate();
 
   // Check for existing session on component mount
@@ -26,7 +26,7 @@ const AdminLogin = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post('http://quizmastershub.duckdns.org/api/admin/login/', {
+      const res = await axios.post(`http://${BASE_URL}/api/admin/login/`, {
         name,
         password,
       });

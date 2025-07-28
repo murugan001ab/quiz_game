@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { index, setIndex, aname, adminId } = useContext(AdminContext);
+  const { index, setIndex, aname, adminId,BASE_URL } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [timer, setTimer] = useState(15);
@@ -19,7 +19,7 @@ const QuizPage = () => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/index/');
+    const ws = new WebSocket(`ws://${BASE_URL}/ws/index/`);
     
     ws.onopen = () => {
       console.log('WebSocket connected');
@@ -47,10 +47,11 @@ const QuizPage = () => {
   }, [setIndex]);
 
   // Fetch questions
+  
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get("http://quizmastershub.duckdns.org/questions/");
+        const response = await axios.get(`http://${BASE_URL}/questions/`);
         setQuestions(response.data);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -119,13 +120,13 @@ const QuizPage = () => {
 
   const handleQuizFinished = () => {
 
-    const admin_id=adminId;
-    const name=aname;
+    const admin_id='5';
 
-    console.log("Quiz finished. Final score:", score,aname,adminId);
+
+    console.log("Quiz finished. Final score:", score,aname, admin_id);
     // Submit score to backend
-    axios.post("http://quizmastershub.duckdns.org/users/", {
-      name,
+    axios.post(`http://${BASE_URL}/users/`, {
+      aname,
       score,
       admin_id
     })
@@ -214,11 +215,7 @@ const QuizPage = () => {
       </div>
 
       {/* Feedback */}
-      {timeExpired && !selectedAnswers[index] && (
-        <div style={styles.timeUpMessage}>
-          <p>Time's up! The correct answer was: <strong>{currentQuestion.correct_answer}</strong></p>
-        </div>
-      )}
+      
 
       {/* Finish Button - Only shows on last question after answer/timeout */}
       {showFinishButton && (

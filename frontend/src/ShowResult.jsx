@@ -3,17 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AdminContext } from './AdminProvider';
 
+
 const ResultsPage = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
-  const { adminId } = useContext(AdminContext);
+  const { adminId ,BASE_URL} = useContext(AdminContext);
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/result/');
+    const ws = new WebSocket(`ws://${BASE_URL}/ws/result/`);
     
     ws.onopen = () => {
       console.log('Connected to results WebSocket');
@@ -35,7 +36,7 @@ const ResultsPage = () => {
     setLoading(true);
     try {
       console.log("Fetching results for admin:", adminId);
-      const response = await axios.get(`http://127.0.0.1:8000/users/?admin_id=${adminId}`);
+      const response = await axios.get(`http://${BASE_URL}/users/?admin_id=5`);
       const sortedResults = [...response.data].sort((a, b) => b.score - a.score);
       setResults(sortedResults);
     } catch (err) {
@@ -99,7 +100,7 @@ const ResultsPage = () => {
                   </thead>
                   <tbody>
                     {results.map((p, i) => (
-                      <tr key={p.id} className={i < 3 ? `top-${i+1}` : ''}>
+                      <tr key={i} className={i < 3 ? `top-${i+1}` : ''}>
                         <td>
                           {i < 3 ? (
                             <span className="medal">{['🥇', '🥈', '🥉'][i]}</span>

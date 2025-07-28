@@ -1,39 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { AdminContext } from './AdminProvider';
 
 const WaitForResult = () => {
+  const { BASE_URL } = useContext(AdminContext);
   const navigate = useNavigate();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
 
-  // WebSocket connection and message handling
+
   useEffect(() => {
-    const ws = new WebSocket('ws://quizmastershub.duckdns.org/ws/result/');
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
     
-    ws.onopen = () => {
-      console.log('Connected to results WebSocket');
-      setSocket(ws);
+    const connectWebSocket = () => {
+      const ws = new WebSocket(`ws://${BASE_URL}/ws/result/`);
+      
+      ws.onopen = () => {
+        reconnectAttempts = 0;
+        socketRef.current = ws;
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'results_control' && data.show) {
+          fetchResults();
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = (e) => {
+        if (reconnectAttempts < maxReconnectAttempts) {
+          setTimeout(() => {
+            reconnectAttempts++;
+            connectWebSocket();
+          }, 1000 * reconnectAttempts);
+        }
+      };
     };
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("WebSocket message received:", data);
-      
-      if (data.type === 'results_control' && data.show) {
-        setLoading(true);
-        fetchResults();
+    connectWebSocket();
+    
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
       }
     };
-
-    return () => ws.close();
   }, []);
 
-  // Fetch results from API
   const fetchResults = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get("http://quizmastershub.duckdns.org/users/");
+      const response = await axios.get(`http://${BASE_URL}/users/?admin_id=5`);
       const sortedResults = [...response.data].sort((a, b) => b.score - a.score);
       setResults(sortedResults);
     } catch (error) {
@@ -43,469 +66,285 @@ const WaitForResult = () => {
     }
   };
 
-  // Medal colors for top 3 positions
   const getMedalColor = (rank) => {
-    if (rank === 1) return '#FFD700'; // Gold
-    if (rank === 2) return '#C0C0C0'; // Silver
-    if (rank === 3) return '#CD7F32'; // Bronze
-    return '#3b82f6'; // Default blue
+    switch(rank) {
+      case 1: return 'linear-gradient(135deg, #FFD700, #FFC000)';
+      case 2: return 'linear-gradient(135deg, #C0C0C0, #A0A0A0)';
+      case 3: return 'linear-gradient(135deg, #CD7F32, #B56C28)';
+      default: return 'linear-gradient(135deg, #F1F5F9, #E2E8F0)';
+    }
+  };
+
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+      padding: '20px',
+      fontFamily: "'Inter', sans-serif",
+    },
+    loadingCard: {
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderRadius: '24px',
+      padding: '40px',
+      textAlign: 'center',
+      maxWidth: '500px',
+      width: '100%',
+      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      transform: 'translateY(0)',
+      transition: 'transform 0.3s ease',
+    },
+    resultsCard: {
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderRadius: '24px',
+      padding: '32px',
+      width: '100%',
+      maxWidth: '800px',
+      boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      transform: 'translateY(0)',
+      transition: 'transform 0.3s ease',
+    },
+    title: {
+      background: 'linear-gradient(90deg, #4F46E5, #7C3AED)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      fontSize: '2.5rem',
+      fontWeight: '800',
+      marginBottom: '16px',
+    },
+    subtitle: {
+      color: '#64748B',
+      fontSize: '1.1rem',
+      marginBottom: '32px',
+    },
+    loadingDots: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '16px',
+      margin: '40px 0',
+    },
+    dot: {
+      width: '20px',
+      height: '20px',
+      borderRadius: '50%',
+      background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+      boxShadow: '0 0 15px rgba(79, 70, 229, 0.5)',
+      animation: 'bounce 1.5s infinite ease-in-out',
+    },
+    table: {
+      width: '100%',
+      borderRadius: '16px',
+      overflow: 'hidden',
+      borderCollapse: 'collapse',
+    },
+    tableHeader: {
+      background: 'linear-gradient(90deg, #4F46E5, #7C3AED)',
+      color: 'white',
+      textAlign: 'left',
+    },
+    tableHeaderCell: {
+      padding: '18px 24px',
+      fontWeight: '600',
+      fontSize: '1.1rem',
+    },
+    tableRow: {
+      borderBottom: '1px solid #E2E8F0',
+      transition: 'all 0.3s ease',
+    },
+    tableCell: {
+      padding: '18px 24px',
+      fontWeight: '500',
+      color: '#1E293B',
+    },
+    rankBadge: {
+      width: '44px',
+      height: '44px',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: '700',
+      fontSize: '1.2rem',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      margin: '0 auto',
+    },
+    scoreBadge: {
+      background: 'linear-gradient(135deg, #E0F2FE, #BAE6FD)',
+      color: '#0369A1',
+      padding: '8px 16px',
+      borderRadius: '20px',
+      fontWeight: '600',
+      fontSize: '0.9rem',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+      display: 'inline-block',
+    },
+    noResults: {
+      textAlign: 'center',
+      padding: '40px',
+      background: 'linear-gradient(135deg, #F8FAFC, #F1F5F9)',
+      borderRadius: '16px',
+      boxShadow: '0 5px 15px rgba(0, 0, 0, 0.05)',
+    },
+    noResultsIcon: {
+      fontSize: '4rem',
+      color: '#94A3B8',
+      marginBottom: '20px',
+      animation: 'pulse 2s infinite',
+    },
+    divider: {
+      height: '3px',
+      width: '80px',
+      background: 'linear-gradient(90deg, #4F46E5, #7C3AED)',
+      margin: '16px auto',
+      borderRadius: '3px',
+    },
+    button: {
+      background: 'linear-gradient(90deg, #4F46E5, #7C3AED)',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '30px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      boxShadow: '0 4px 15px rgba(79, 70, 229, 0.3)',
+      transition: 'all 0.3s ease',
+      marginTop: '24px',
+    },
   };
 
   return (
     <div style={styles.container}>
       {loading ? (
-        <div style={styles.waitingScreen}>
-          <div style={styles.header}>
-            <div style={styles.logo}>Quiz Game</div>
-            <h1 style={styles.waitingTitle}>Results are on the way !</h1>
+        <div style={styles.loadingCard}>
+          <div>
+            <h1 style={styles.title}>Calculating Results</h1>
+            <p style={styles.subtitle}>Finalizing the scores...</p>
           </div>
           
-          <div style={styles.animationContainer}>
-              <div style={styles.loadingAnimation}>
-            <div style={styles.loadingDot}></div>
-            <div style={styles.loadingDot}></div>
-            <div style={styles.loadingDot}></div>
+          <div style={styles.loadingDots}>
+            {[0, 0.2, 0.4].map((delay) => (
+              <div 
+                key={delay}
+                style={{
+                  ...styles.dot,
+                  animationDelay: `${delay}s`
+                }}
+              />
+            ))}
           </div>
-            {/* <div style={styles.podium}>
-              <div style={styles.podiumFirst}></div>
-              <div style={styles.podiumSecond}></div>
-              <div style={styles.podiumThird}></div>
-            </div> */}
-            
-            {/* <div style={styles.trophy}>
-              <div style={styles.trophyBase}></div>
-              <div style={styles.trophyStem}></div>
-              <div style={styles.trophyTop}></div>
-              <div style={styles.trophyGlow}></div>
-            </div> */}
-          </div>
-          
-          {/* <p style={styles.waitingMessage}>
-            The quiz master is preparing to reveal the results...
-          </p> */}
-          
-        
-          
-          {/* <div style={styles.statusCard}>
-            <div style={styles.statusItem}>
-              <div style={styles.statusLabel}>Status:</div>
-              <div style={styles.statusValue}>
-                Waiting for results
-              </div>
-            </div>
-          </div> */}
+          <p style={{ color: '#4F46E5', opacity: 0.7, fontSize: '0.9rem', marginTop: '16px' }}>
+            This won't take long...
+          </p>
         </div>
       ) : (
-        <div style={styles.resultsScreen}>
-          {/* <div style={styles.header}>
-            <div style={styles.logo}>QuizMaster</div>
-            <h1 style={styles.resultsTitle}>Quiz Results</h1>
-          </div> */}
+        <div style={styles.resultsCard}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <h1 style={styles.title}>Quiz Results</h1>
+            <div style={styles.divider}></div>
+          </div>
           
-          <div style={styles.resultsContainer}>
+          <div style={{ overflowX: 'auto' }}>
             {results.length > 0 ? (
-              <div style={styles.resultsTable}>
-                {/* <div style={styles.tableHeader}>
-                  <div style={styles.headerCell}>Rank</div>
-                  <div style={styles.headerCell}>Participant</div>
-                  <div style={styles.headerCell}>Score</div>
-                </div> */}
-                
-                {results.map((participant, index) => (
-                  <div 
-                    key={participant.id} 
-                    style={styles.tableRow(index === 0)}
-                  >
-                    <div style={styles.rankCell}>
-                      {/* <div style={styles.rankBadge(index + 1)}>
-                        {index + 1}
-                      </div> */}
-                    </div>
-                    {/* <div style={styles.nameCell}>
-                      {participant.name}
-                    </div> */}
-                    <div style={styles.scoreCell}>
-                      {/* <div style={styles.scoreBadge}>
-                        {participant.score} points
-                      </div> */}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <table style={styles.table}>
+                <thead style={styles.tableHeader}>
+                  <tr>
+                    <th style={{ ...styles.tableHeaderCell, textAlign: 'center' }}>Rank</th>
+                    <th style={styles.tableHeaderCell}>Participant</th>
+                    <th style={{ ...styles.tableHeaderCell, textAlign: 'center' }}>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((participant, index) => (
+                    <tr 
+                      key={participant.id || index}
+                      style={{
+                        ...styles.tableRow,
+                        backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(248, 250, 252, 0.9)',
+                      }}
+                    >
+                      <td style={{ ...styles.tableCell, textAlign: 'center' }}>
+                        <div 
+                          style={{
+                            ...styles.rankBadge,
+                            background: getMedalColor(index + 1),
+                            color: index < 3 ? 'white' : '#1E293B',
+                          }}
+                        >
+                          {index + 1}
+                        </div>
+                      </td>
+                      <td style={styles.tableCell}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            marginRight: '12px',
+                            background: index < 3 ? 'linear-gradient(90deg, #4F46E5, #7C3AED)' : '#A5B4FC',
+                          }}></div>
+                          {participant.name || `Participant ${index + 1}`}
+                        </div>
+                      </td>
+                      <td style={{ ...styles.tableCell, textAlign: 'center' }}>
+                        <span style={styles.scoreBadge}>
+                          {participant.score} points
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             ) : (
               <div style={styles.noResults}>
-                {/* <div style={styles.noResultsIcon}>📊</div>
-                <h3>No Results Available</h3>
-                <p>Participants haven't completed the quiz yet</p> */}
+                <div style={styles.noResultsIcon}>📊</div>
+                <h3 style={{ color: '#1E293B', fontSize: '1.5rem', marginBottom: '8px' }}>No Results Yet</h3>
+                <p style={{ color: '#64748B', marginBottom: '16px' }}>Waiting for participants to complete the quiz</p>
+                <button 
+                  style={styles.button}
+                  onClick={fetchResults}
+                >
+                  Refresh Results
+                </button>
               </div>
             )}
           </div>
-          
-          <div style={styles.actions}>
-            {/* <button 
-              onClick={() => navigate('/quiz')}
-              style={styles.backButton}
-            >
-              Back to Quiz
-            </button> */}
-          </div>
+
+          {results.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
+              <button 
+                style={{
+                  ...styles.button,
+                  padding: '12px 32px',
+                }}
+                onClick={() => navigate('/')}
+              >
+                Back to Home
+              </button>
+            </div>
+          )}
         </div>
       )}
+
+      <style>
+        {`
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+          }
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+          }
+        `}
+      </style>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#f0f5ff',
-    backgroundImage: 'linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: '20px',
-  },
-  header: {
-    textAlign: 'center',
-    marginBottom: '30px',
-  },
-  logo: {
-    fontSize: '2.5rem',
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: '10px',
-    textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-  },
-  waitingScreen: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: '20px',
-    padding: '40px',
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
-    textAlign: 'center',
-    maxWidth: '600px',
-    width: '100%',
-  },
-  waitingTitle: {
-    fontSize: '2rem',
-    color: '#3a0ca3',
-    margin: '0 0 10px',
-    fontWeight: '600',
-  },
-  waitingMessage: {
-    fontSize: '1.2rem',
-    color: '#64748b',
-    margin: '0 0 30px',
-  },
-  animationContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    height: '200px',
-    margin: '40px 0',
-    position: 'relative',
-  },
-  podium: {
-    display: 'flex',
-    alignItems: 'flex-end',
-    height: '150px',
-    zIndex: 2,
-  },
-  podiumFirst: {
-    width: '80px',
-    height: '120px',
-    backgroundColor: '#FFD700',
-    borderTopLeftRadius: '10px',
-    borderTopRightRadius: '10px',
-    margin: '0 5px',
-    boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
-  },
-  podiumSecond: {
-    width: '80px',
-    height: '90px',
-    backgroundColor: '#C0C0C0',
-    borderTopLeftRadius: '10px',
-    borderTopRightRadius: '10px',
-    margin: '0 5px',
-    boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
-  },
-  podiumThird: {
-    width: '80px',
-    height: '60px',
-    backgroundColor: '#CD7F32',
-    borderTopLeftRadius: '10px',
-    borderTopRightRadius: '10px',
-    margin: '0 5px',
-    boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
-  },
-  trophy: {
-    position: 'absolute',
-    top: '0',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 3,
-  },
-  trophyBase: {
-    width: '50px',
-    height: '10px',
-    backgroundColor: '#FFD700',
-    borderRadius: '5px',
-    margin: '0 auto',
-  },
-  trophyStem: {
-    width: '10px',
-    height: '50px',
-    backgroundColor: '#FFD700',
-    margin: '0 auto',
-  },
-  trophyTop: {
-    width: '40px',
-    height: '40px',
-    backgroundColor: '#FFD700',
-    borderRadius: '50%',
-    margin: '0 auto',
-    position: 'relative',
-    top: '-10px',
-  },
-  trophyGlow: {
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255, 215, 0, 0.3)',
-    animation: 'pulse 2s infinite',
-  },
-  loadingAnimation: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
-    margin: '30px 0',
-  },
-  loadingDot: {
-    width: '20px',
-    height: '20px',
-    backgroundColor: '#4361ee',
-    borderRadius: '50%',
-    animation: 'bounce 1.5s infinite',
-  },
-  statusCard: {
-    backgroundColor: '#f1f5f9',
-    borderRadius: '15px',
-    padding: '20px',
-    marginTop: '20px',
-  },
-  statusItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  statusLabel: {
-    fontSize: '1.1rem',
-    color: '#64748b',
-    fontWeight: '500',
-  },
-  statusValue: {
-    fontSize: '1.1rem',
-    color: '#3a0ca3',
-    fontWeight: '600',
-  },
-  resultsScreen: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: '20px',
-    padding: '30px',
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
-    width: '100%',
-    maxWidth: '800px',
-  },
-  resultsTitle: {
-    fontSize: '2rem',
-    color: '#3a0ca3',
-    margin: '0 0 10px',
-    fontWeight: '600',
-  },
-  resultsContainer: {
-    margin: '30px 0',
-  },
-  resultsTable: {
-    display: 'flex',
-    flexDirection: 'column',
-    borderRadius: '15px',
-    overflow: 'hidden',
-    boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-  },
-  tableHeader: {
-    display: 'flex',
-    backgroundColor: '#3a0ca3',
-    color: 'white',
-    fontWeight: '600',
-  },
-  headerCell: {
-    flex: 1,
-    padding: '15px 20px',
-    textAlign: 'center',
-  },
-  tableRow: (isFirst) => ({
-    display: 'flex',
-    backgroundColor: isFirst ? '#f8fafc' : 'white',
-    borderBottom: '1px solid #e2e8f0',
-  }),
-  rankCell: {
-    flex: 1,
-    padding: '15px 10px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rankBadge: (rank) => ({
-    width: '40px',
-    height: '40px',
-    backgroundColor: getMedalColor(rank),
-    color: rank <= 3 ? 'white' : '#1e293b',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: '700',
-    fontSize: '1.1rem',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-  }),
-  nameCell: {
-    flex: 3,
-    padding: '15px 20px',
-    fontWeight: '500',
-    fontSize: '1.1rem',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  scoreCell: {
-    flex: 2,
-    padding: '15px 20px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scoreBadge: {
-    backgroundColor: '#dbeafe',
-    color: '#2563eb',
-    padding: '8px 20px',
-    borderRadius: '20px',
-    fontWeight: '600',
-    fontSize: '1rem',
-  },
-  noResults: {
-    textAlign: 'center',
-    padding: '40px 20px',
-    backgroundColor: '#f8fafc',
-    borderRadius: '15px',
-  },
-  noResultsIcon: {
-    fontSize: '4rem',
-    color: '#cbd5e1',
-    marginBottom: '20px',
-  },
-  actions: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginTop: '20px',
-  },
-  backButton: {
-    backgroundColor: '#4361ee',
-    background: 'linear-gradient(135deg, #4361ee, #3a0ca3)',
-    color: 'white',
-    border: 'none',
-    padding: '14px 40px',
-    borderRadius: '50px',
-    fontSize: '1.1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 5px 15px rgba(67, 97, 238, 0.3)',
-  },
-  
-  // Animations
-  '@keyframes pulse': {
-    '0%': { transform: 'scale(1)', opacity: 0.7 },
-    '50%': { transform: 'scale(1.1)', opacity: 0.4 },
-    '100%': { transform: 'scale(1)', opacity: 0.7 },
-  },
-  '@keyframes bounce': {
-    '50%, 100%': { transform: 'translateY(55)' },
-    '50%': { transform: 'translateY(515px)' },
-  },
-
-  
-  
-  // Responsive styles
-  '@media (max-width: 768px)': {
-    waitingScreen: {
-      padding: '30px 20px',
-    },
-    resultsScreen: {
-      padding: '25px 15px',
-    },
-    animationContainer: {
-      height: '150px',
-    },
-    podiumFirst: {
-      width: '60px',
-      height: '100px',
-    },
-    podiumSecond: {
-      width: '60px',
-      height: '70px',
-    },
-    podiumThird: {
-      width: '60px',
-      height: '50px',
-    },
-    trophyTop: {
-      width: '30px',
-      height: '30px',
-    },
-    tableHeader: {
-      display: 'none',
-    },
-    tableRow: {
-      flexDirection: 'column',
-      padding: '15px',
-      marginBottom: '15px',
-      borderRadius: '10px',
-      boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-    },
-    rankCell: {
-      justifyContent: 'flex-start',
-      padding: '5px 0',
-    },
-    nameCell: {
-      padding: '5px 0',
-      fontSize: '1.2rem',
-      fontWeight: '600',
-    },
-    scoreCell: {
-      justifyContent: 'flex-start',
-      padding: '5px 0',
-    },
-    headerCell: {
-      padding: '12px 15px',
-    },
-  },
-  '@media (max-width: 480px)': {
-    logo: {
-      fontSize: '2rem',
-    },
-    waitingTitle: {
-      fontSize: '1.7rem',
-    },
-    resultsTitle: {
-      fontSize: '1.7rem',
-    },
-    backButton: {
-      width: '100%',
-      padding: '14px',
-    },
-  },
 };
 
 export default WaitForResult;

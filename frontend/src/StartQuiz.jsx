@@ -8,11 +8,11 @@ const QuizStartPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
-  const { adminId } = useContext(AdminContext);
+  const { adminId ,BASE_URL} = useContext(AdminContext);
 
   useEffect(() => {
     // Connect to WebSocket
-    socket.current = new WebSocket("ws://quizmastershub.duckdns.org/ws/chat/");
+    socket.current = new WebSocket(`ws://${BASE_URL}/ws/chat/`);
 
     socket.current.onopen = () => {
       console.log("✅ WebSocket connected");
