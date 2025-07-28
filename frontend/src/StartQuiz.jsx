@@ -8,10 +8,19 @@ const QuizStartPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
-  const { adminId ,BASE_URL} = useContext(AdminContext);
+  const { BASE_URL} = useContext(AdminContext);
+
+  const [adminId, setAdminId] = useState(localStorage.getItem('adminId') || null);
+
+
+
 
   useEffect(() => {
     // Connect to WebSocket
+      const adminId = localStorage.getItem('adminId');
+      console.log("Stored Admin ID:", adminId);
+      setAdminId(adminId);
+
     socket.current = new WebSocket(`ws://${BASE_URL}/ws/chat/`);
 
     socket.current.onopen = () => {

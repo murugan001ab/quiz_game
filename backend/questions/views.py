@@ -52,15 +52,15 @@ class QuestionListByAdmin(APIView):
     
 class QuizQuestionDetail(APIView):
    
-    def put(self, request, pk,admin_id):
-        question = get_object_or_404(Question, pk=pk,admin_id=admin_id)
+    def put(self, request, pk):
+        question = get_object_or_404(Question, pk=pk)
         serializer = QuestionSerializer(question, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
-    def delete(self, request, pk,admin_id):
+    def delete(self, request, pk):
         question = get_object_or_404(Question, pk=pk)
         question.delete()
         return Response(status=204)

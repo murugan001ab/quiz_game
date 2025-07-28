@@ -10,7 +10,10 @@ const ResultsPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
-  const { adminId ,BASE_URL} = useContext(AdminContext);
+  const { BASE_URL} = useContext(AdminContext);
+
+
+  const adminId = localStorage.getItem('adminId') || null;
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -36,7 +39,7 @@ const ResultsPage = () => {
     setLoading(true);
     try {
       console.log("Fetching results for admin:", adminId);
-      const response = await axios.get(`http://${BASE_URL}/users/?admin_id=5`);
+      const response = await axios.get(`http://${BASE_URL}/users/?admin_id=${adminId}`);
       const sortedResults = [...response.data].sort((a, b) => b.score - a.score);
       setResults(sortedResults);
     } catch (err) {

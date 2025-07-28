@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { index, setIndex, aname, adminId,BASE_URL } = useContext(AdminContext);
+  const { index, setIndex, aname,BASE_URL } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [timer, setTimer] = useState(15);
@@ -15,11 +15,13 @@ const QuizPage = () => {
   const [timeExpired, setTimeExpired] = useState(false);
   const [showFinishButton, setShowFinishButton] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [adminId, setAdminId] = useState(localStorage.getItem('adminId') || null);
 
   // Initialize WebSocket connection
   useEffect(() => {
     const ws = new WebSocket(`ws://${BASE_URL}/ws/index/`);
+
+    console.log("Stored Admin ID:", adminId);
     
     ws.onopen = () => {
       console.log('WebSocket connected');
@@ -51,7 +53,7 @@ const QuizPage = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://${BASE_URL}/questions/`);
+        const response = await axios.get(`http://${BASE_URL}/questions/${adminId}`);
         setQuestions(response.data);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -120,15 +122,15 @@ const QuizPage = () => {
 
   const handleQuizFinished = () => {
 
-    const admin_id='5';
+    // const admin_id='5';
 
 
-    console.log("Quiz finished. Final score:", score,aname, admin_id);
+    console.log("Quiz finished. Final score:", score,aname, adminId);
     // Submit score to backend
     axios.post(`http://${BASE_URL}/users/`, {
-      aname,
-      score,
-      admin_id
+      aname:aname,
+      score:score,
+      admin_id:adminId
     })
     .then(() => {
       navigate('/wait');

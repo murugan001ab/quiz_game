@@ -46,7 +46,7 @@ const QuestionManager = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${API_BASE}${adminId}/`);
+        const response = await axios.get(`${API_BASE}admin/${adminId}/`);
         
         // Ensure we're working with an array
         const questionsData = Array.isArray(response?.data) ? response.data : [];
@@ -101,7 +101,7 @@ const QuestionManager = () => {
 
     try {
       if (editingId) {
-        await axios.put(`${API_BASE}${editingId}/${adminId}/`, payload);
+        await axios.put(`${API_BASE}${editingId}/`, payload);
       } else {
         await axios.post(API_BASE, payload);
       }
@@ -149,7 +149,7 @@ const QuestionManager = () => {
     if (window.confirm('Are you sure you want to delete this question?')) {
       setLoading(true);
       try {
-        await axios.delete(`${API_BASE}${id}/${adminId}/`);
+        await axios.delete(`${API_BASE}${id}/`);
         setQuestions(prev => prev.filter(q => q.id !== id));
       } catch (err) {
         setError(err.response?.data?.message || 'Delete failed');

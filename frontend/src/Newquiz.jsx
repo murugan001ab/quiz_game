@@ -12,7 +12,7 @@ const NewQuiz = () => {
   const [timer, setTimer] = useState(0);
   const [enableNext, setEnableNext] = useState(false);
   const [enableFinish, setEnableFinish] = useState(false);
-
+  const [adminId, setAdminId] = useState(localStorage.getItem('adminId') || null);
   // Timer effect
   useEffect(() => {
     const timerInterval = setInterval(() => {
@@ -72,7 +72,7 @@ const NewQuiz = () => {
   // Fetch questions
   useEffect(() => {
     axios
-      .get(`http://${BASE_URL}/questions/`)
+      .get(`http://${BASE_URL}/questions/${adminId}`)
       .then((res) => {
         setQuestions(res.data);
         setLoading(false);
