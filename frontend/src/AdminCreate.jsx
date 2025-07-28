@@ -1,25 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminCreatePage = () => {
   const [adminData, setAdminData] = useState({ name: "", password: "" });
   const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setAdminData({ ...adminData, [e.target.name]: e.target.value });
   };
 
+  // Handle navigation after success
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        navigate("/admin");
+      }, 3000); // 3 second delay
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://quizmastershub.duckdns.org/api/admin/create/", adminData);
+      const res = await axios.post(
+        "http://quizmastershub.duckdns.org/api/admin/create/", 
+        adminData
+      );
       setMessage("Admin created successfully!");
+      setIsSuccess(true);
       setAdminData({ name: "", password: "" });
     } catch (err) {
       console.error(err);
       setMessage("Error creating admin.");
+      setIsSuccess(false);
     }
   };
 
@@ -28,7 +45,6 @@ const AdminCreatePage = () => {
       <div className="admin-create-card">
         <div className="admin-create-header">
           <h2>Create Admin Account</h2>
-          {/* <div className="admin-logo">A+</div> */}
         </div>
         
         <form onSubmit={handleSubmit} className="admin-create-form">
@@ -56,8 +72,13 @@ const AdminCreatePage = () => {
           <button type="submit" className="create-button">Create Admin</button>
           
           {message && (
-            <div className={`message ${message.includes('success') ? 'success' : 'error'}`}>
+            <div className={`message ${isSuccess ? 'success' : 'error'}`}>
               {message}
+              {isSuccess && (
+                <div className="redirect-message">
+                  Redirecting to login in 3 seconds...
+                </div>
+              )}
             </div>
           )}
         </form>
@@ -96,21 +117,6 @@ const AdminCreatePage = () => {
           color: #2c3e50;
           margin-bottom: 10px;
           font-size: 24px;
-        }
-        
-        .admin-logo {
-          width: 60px;
-          height: 60px;
-          margin: 0 auto 20px;
-          background: #3498db;
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 28px;
-          font-weight: bold;
-          box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
         }
         
         .admin-create-form {
@@ -174,6 +180,12 @@ const AdminCreatePage = () => {
           color: #721c24;
         }
         
+        .redirect-message {
+          margin-top: 8px;
+          font-size: 12px;
+          opacity: 0.8;
+        }
+        
         .admin-create-links {
           margin-top: 25px;
           display: flex;
@@ -201,12 +213,6 @@ const AdminCreatePage = () => {
           
           .admin-create-header h2 {
             font-size: 20px;
-          }
-          
-          .admin-logo {
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
           }
           
           .form-group input {

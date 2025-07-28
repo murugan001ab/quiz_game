@@ -43,12 +43,15 @@ class QuizQuestionListCreate(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
-class QuizQuestionDetail(APIView):
-    def get(self, request, pk,admin_id):
-        question = get_object_or_404(Question, pk=pk,admin_id=admin_id)
-        serializer = QuestionSerializer(question)
+    
+class QuestionListByAdmin(APIView):
+    def get(self, request, admin_id):
+        questions = Question.objects.filter(admin_id=admin_id)  # Use filter() not all()
+        serializer = QuestionSerializer(questions, many=True)
         return Response(serializer.data)
-
+    
+class QuizQuestionDetail(APIView):
+   
     def put(self, request, pk,admin_id):
         question = get_object_or_404(Question, pk=pk,admin_id=admin_id)
         serializer = QuestionSerializer(question, data=request.data)

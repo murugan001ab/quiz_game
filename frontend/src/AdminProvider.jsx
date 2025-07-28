@@ -10,10 +10,16 @@ export const AdminProvider = ({ children }) => {
   const [aname, setName] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   
+   const logout = () => {
+    localStorage.removeItem('adminId');
+    localStorage.removeItem('adminSessionExpiry');
+    setAdminId(null);
+    setIsLogin(false);
+  };
 
 
   return (
-    <AdminContext.Provider value={{ adminId, setAdminId,Qtime,setQTime,index,setIndex ,socket, setSocket, aname, setName , isLogin, setIsLogin }}>
+    <AdminContext.Provider value={{ adminId, setAdminId,Qtime,setQTime,index,setIndex ,socket, setSocket, aname, setName , isLogin, setIsLogin,logout }}>
       {children}
     </AdminContext.Provider>
   );

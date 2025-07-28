@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UserCreateView,AdminLoginView,AdminCreateView,QuizQuestionDetail,QuizQuestionListCreate,AdminResetPasswordView,AdminControlView
+from .views import UserCreateView,AdminLoginView,AdminCreateView,QuizQuestionDetail,QuizQuestionListCreate,AdminResetPasswordView,QuestionListByAdmin
 from .views import home
 
 urlpatterns = [
@@ -8,6 +8,8 @@ urlpatterns = [
     path('api/admin/create/', AdminCreateView.as_view(), name='admin-create'),
     path('questions/', QuizQuestionListCreate.as_view()),
     path('questions/<int:pk>/<int:admin_id>/', QuizQuestionDetail.as_view()),
+    path('questions/<int:admin_id>/', QuestionListByAdmin.as_view()),
+
     path('api/admin/forgot-password/', AdminResetPasswordView.as_view()),
     path('', home, name='home'),
     ]

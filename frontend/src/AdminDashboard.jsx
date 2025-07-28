@@ -2,10 +2,14 @@ import React from 'react';
 import { FiBook, FiSettings, FiBarChart2, FiLogOut } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import LogoutButton from './Logout';
 
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+
+
+
 
   const handleLogout = () => {
     // Add logout logic here
@@ -31,7 +35,7 @@ const AdminDashboard = () => {
         
         <button className="logout-btn" onClick={handleLogout}>
           <FiLogOut className="logout-icon" />
-          Logout
+          <LogoutButton/>
         </button>
       </div>
 

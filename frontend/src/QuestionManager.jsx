@@ -5,24 +5,64 @@ import { AdminContext } from './AdminProvider';
 const API_BASE = 'http://quizmastershub.duckdns.org/questions/';
 
 const QuestionManager = () => {
-  const { adminId, setQTime } = useContext(AdminContext);
+  const { setQTime } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [adminId, setAdminId] = useState(null);
   const [form, setForm] = useState({
     question_text: '',
     options: ['', '', '', ''],
     correct_answer: '',
     status: 'not answered',
-    admin: adminId,
-    discription: "",
+    admin: null,
+    description: "", // Fixed typo from discription
   });
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+  // Get adminId from localStorage when component mounts
   useEffect(() => {
-    fetchQuestions();
+    const storedAdminId = localStorage.getItem('adminId');
+    if (storedAdminId) {
+      setAdminId(storedAdminId);
+      setForm(prev => ({
+        ...prev,
+        admin: storedAdminId
+      }));
+    } else {
+      alert('Admin not logged in');
+    }
   }, []);
+
+  // Fetch questions when adminId changes
+  useEffect(() => {
+    if (!adminId) return;
+    
+    const fetchQuestions = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(`${API_BASE}${adminId}/`);
+        setQuestions(response.data);
+        setFilteredQuestions(response.data);
+      } catch (err) {
+        setError('Failed to load questions');
+        console.error('Error:', err.response?.data || err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchQuestions();
+  }, [adminId]); // Add adminId as dependency
+
+
+
+
+
 
   useEffect(() => {
     const results = questions.filter(question =>
@@ -33,7 +73,7 @@ const QuestionManager = () => {
   }, [searchTerm, questions]);
 
   const fetchQuestions = async () => {
-    const res = await axios.get(API_BASE);
+    const res = await axios.get(`${API_BASE}${adminId}/`);
     setQuestions(res.data);
     setFilteredQuestions(res.data);
   };
