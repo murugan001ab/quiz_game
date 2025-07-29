@@ -30,6 +30,7 @@ const GetReady = () => {
         // Always update admin ID if it's in the message
         if (data.adminid) {
           setAdminId(data.adminid);
+          localStorage.setItem('adminId',adminId);
           console.log("Admin ID updated in context");
         }
 
