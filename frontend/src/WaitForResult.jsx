@@ -11,7 +11,7 @@ const WaitForResult = () => {
   const socketRef = useRef(null);
 
   const [adminId,setAdminId]=useState(localStorage.getItem("adminId") || null )
-
+  const startgame=localStorage.getItem('startgame')
 
   useEffect(() => {
     let reconnectAttempts = 0;
@@ -27,7 +27,7 @@ const WaitForResult = () => {
 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'results_control' && data.show) {
+        if ((data.type === 'results_control' && data.show ) || (startgame=='true')) {
           fetchResults();
         }
       };
