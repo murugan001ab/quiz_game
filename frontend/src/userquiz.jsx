@@ -133,6 +133,7 @@ const QuizPage = () => {
       admin_id:adminId
     })
     .then(() => {
+      localStorage.setItem('startgame',false);
       navigate('/wait');
     })
     .catch(err => {
