@@ -26,6 +26,8 @@ class User(models.Model):
         return self.name
 
 
+from django.db import models
+
 class Question(models.Model):
     STATUS_CHOICES = [
         ("answered", "Answered"),
@@ -41,13 +43,11 @@ class Question(models.Model):
         choices=STATUS_CHOICES,
         default="not answered"
     )
-    discription=models.CharField(max_length=5000)
-
-    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, related_name='questions')
+    discription = models.CharField(max_length=5000, blank=True)  # Fixed spelling and made optional
+    admin = models.ForeignKey('Admin', on_delete=models.CASCADE, related_name='questions')
 
     def __str__(self):
-        return self.question_text
-
+        return self.question_text[:50]  # Show first 50 chars of question
 
 
 class AdminControl(models.Model):

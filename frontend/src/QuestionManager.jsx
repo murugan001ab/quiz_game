@@ -2,10 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AdminContext } from './AdminProvider';
 
-
-
 const QuestionManager = () => {
-  const { setQTime,BASE_URL } = useContext(AdminContext);
+  const { BASE_URL } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,12 +15,25 @@ const QuestionManager = () => {
     correct_answer: '',
     status: 'not answered',
     admin: null,
-    description: "",
+    discription: "",
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_BASE = `http://${BASE_URL}/questions/`;
+  const API_BASE = `http://${BASE_URL}/`;
+
+  // Debug network requests
+  useEffect(() => {
+    axios.interceptors.request.use(request => {
+      console.log('Starting Request', request);
+      return request;
+    });
+
+    axios.interceptors.response.use(response => {
+      console.log('Response:', response);
+      return response;
+    });
+  }, []);
 
   // Get adminId from localStorage when component mounts
   useEffect(() => {
@@ -46,23 +57,19 @@ const QuestionManager = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${API_BASE}admin/${adminId}/`);
-        
-        // Ensure we're working with an array
-        const questionsData = Array.isArray(response?.data) ? response.data : [];
-        
-        setQuestions(questionsData);
-        setFilteredQuestions(questionsData);
+        const response = await axios.get(`${API_BASE}fetch/admin/${adminId}/`);
+        setQuestions(Array.isArray(response?.data) ? response.data : []);
+        setFilteredQuestions(Array.isArray(response?.data) ? response.data : []);
       } catch (err) {
+        console.error('Fetch error:', err.response?.data || err.message);
         setError(err.response?.data?.message || 'Failed to load questions');
-        console.error('Error:', err);
       } finally {
         setLoading(false);
       }
     };
     
     fetchQuestions();
-  }, [adminId]);
+  }, [adminId, API_BASE]);
 
   // Filter questions based on search term
   useEffect(() => {
@@ -71,10 +78,10 @@ const QuestionManager = () => {
       return;
     }
 
-    const results = questions.filter(question =>
-      (question.question_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      question.description?.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+  const results = questions.filter(question =>
+  question.question_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  question.discription?.toLowerCase().includes(searchTerm.toLowerCase())
+);
     setFilteredQuestions(results);
   }, [searchTerm, questions]);
 
@@ -89,30 +96,80 @@ const QuestionManager = () => {
     setForm(prev => ({ ...prev, options: newOptions }));
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this question?')) {
+      setLoading(true);
+      try {
+        await axios.delete(`${API_BASE}edit/${id}/`);
+        const response = await axios.get(`${API_BASE}fetch/admin/${adminId}/`);
+        setQuestions(Array.isArray(response?.data) ? response.data : []);
+      } catch (err) {
+        console.error('Delete error:', err.response?.data || err.message);
+        setError(err.response?.data?.message || 'Failed to delete question');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate at least 2 non-empty options
+    const filledOptions = form.options.filter(opt => opt.trim() !== '');
+    if (filledOptions.length < 2) {
+      setError('Please provide at least 2 options');
+      return;
+    }
+
+    // Validate correct answer exists in options
+    if (!filledOptions.includes(form.correct_answer)) {
+      setError('Correct answer must match one of the options');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     const payload = {
-      ...form,
-      options: form.options.filter(opt => opt.trim() !== '') // Remove empty options
+      question_text: form.question_text,
+      options: filledOptions,
+      correct_answer: form.correct_answer,
+      status: form.status,
+      admin: parseInt(adminId, 10),
+      discription: form.discription || ""
     };
 
     try {
+      let response;
       if (editingId) {
-        await axios.put(`${API_BASE}${editingId}/`, payload);
+        response = await axios.put(`${API_BASE}edit/${editingId}/`, payload);
+        console.log('Update response:', response.data);
       } else {
-        await axios.post(API_BASE, payload);
+        response = await axios.post(`${API_BASE}questions/`, payload);
+        console.log('Create response:', response.data);
       }
-      // Refresh questions after successful operation
-      const response = await axios.get(`${API_BASE}${adminId}/`);
-      setQuestions(Array.isArray(response?.data) ? response.data : []);
-      resetForm();
+      
+      // Refresh the questions list
+      const questionsResponse = await axios.get(`${API_BASE}fetch/admin/${adminId}/`);
+      setQuestions(Array.isArray(questionsResponse?.data) ? questionsResponse.data : []);
+      
+      // Close modal and reset form only if successful
       setShowModal(false);
+      resetForm();
     } catch (err) {
-      setError(err.response?.data?.message || 'Operation failed');
-      console.error('Error:', err);
+      console.error('API error:', err.response?.data || err.message);
+      const backendError = err.response?.data;
+      if (typeof backendError === 'object') {
+        // Handle field-specific errors
+        const errorMessages = [];
+        for (const [field, messages] of Object.entries(backendError)) {
+          errorMessages.push(`${field}: ${Array.isArray(messages) ? messages.join(' ') : messages}`);
+        }
+        setError(errorMessages.join('\n'));
+      } else {
+        setError(backendError?.message || err.message || 'Operation failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -125,9 +182,10 @@ const QuestionManager = () => {
       correct_answer: '',
       status: 'not answered',
       admin: adminId,
-      description: ''
+      discription: ""
     });
     setEditingId(null);
+    setError(null);
   };
 
   const handleEdit = (question) => {
@@ -135,30 +193,14 @@ const QuestionManager = () => {
     setForm({
       question_text: question.question_text || '',
       options: Array.isArray(question.options) ? 
-        [...question.options] : 
-        ['', '', '', ''],
+        [...question.options, '', '', ''].slice(0, 4) : ['', '', '', ''],
       correct_answer: question.correct_answer || '',
       status: question.status || 'not answered',
       admin: question.admin || adminId,
-      description: question.description || ''
+      discription: question.discription || question.discription || ""
     });
     setShowModal(true);
   };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this question?')) {
-      setLoading(true);
-      try {
-        await axios.delete(`${API_BASE}${id}/`);
-        setQuestions(prev => prev.filter(q => q.id !== id));
-      } catch (err) {
-        setError(err.response?.data?.message || 'Delete failed');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
   return (
     <div className="question-manager-container">
       {loading && <div className="loading-indicator">Loading...</div>}
@@ -199,7 +241,7 @@ const QuestionManager = () => {
                   <p><strong>Options:</strong> {q.options?.join(', ') || 'No options'}</p>
                   <p><strong>Answer:</strong> {q.correct_answer || 'Not specified'}</p>
                   <p><strong>Status:</strong> <span className={`status-${q.status?.replace(' ', '')}`}>{q.status}</span></p>
-                  {q.description && <p><strong>Description:</strong> {q.description}</p>}
+                  {(q.discription || q.discription) && <p><strong>discription:</strong> {q.discription || q.discription}</p>}
                 </div>
                 <div className="question-actions">
                   <button 
@@ -267,7 +309,7 @@ const QuestionManager = () => {
                     placeholder={`Option ${index + 1}`}
                     value={opt}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                    required={index < 2} // At least 2 options required
+                    required={index < 2}
                     disabled={loading}
                   />
                 ))}
@@ -301,11 +343,11 @@ const QuestionManager = () => {
               </div>
 
               <div className="form-group">
-                <label>Description</label>
+                <label>discription</label>
                 <textarea 
-                  name="description" 
-                  placeholder="Enter question description"
-                  value={form.description} 
+                  name="discription" 
+                  placeholder="Enter question discription"
+                  value={form.discription} 
                   onChange={handleInputChange}
                   rows="3"
                   disabled={loading}
@@ -335,6 +377,7 @@ const QuestionManager = () => {
           </div>
         </div>
       )}
+
 
       <style jsx>{`
         .question-manager-container {

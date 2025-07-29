@@ -7,8 +7,8 @@ urlpatterns = [
     path('api/admin/login/',AdminLoginView.as_view(), name='admin-login'),
     path('api/admin/create/', AdminCreateView.as_view(), name='admin-create'),
     path('questions/', QuizQuestionListCreate.as_view()),
-    path('questions/<int:pk>/', QuizQuestionDetail.as_view()),
-    path('questions/admin/<int:admin_id>/', QuestionListByAdmin.as_view()),
+    path('edit/<int:pk>/', QuizQuestionDetail.as_view()),
+    path('fetch/admin/<int:admin_id>/', QuestionListByAdmin.as_view()),
     path('api/admin/forgot-password/', AdminResetPasswordView.as_view()),
     path('', home, name='home'),
     ]

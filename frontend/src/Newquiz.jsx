@@ -7,18 +7,35 @@ const NewQuiz = () => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { index, setIndex, socket, setSocket,BASE_URL } = useContext(AdminContext);
+  const { index, setIndex, socket, setSocket, BASE_URL } = useContext(AdminContext);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
   const [timer, setTimer] = useState(0);
   const [enableNext, setEnableNext] = useState(false);
   const [enableFinish, setEnableFinish] = useState(false);
   const [adminId, setAdminId] = useState(localStorage.getItem('adminId') || null);
-  // Timer effect
+  const [countdown, setCountdown] = useState(5); // 5-second countdown
+  const [showQuestion, setShowQuestion] = useState(false);
+
+  // Countdown effect
   useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0) {
+      setShowQuestion(true);
+    }
+  }, [countdown]);
+
+  // Timer effect (only runs after countdown)
+  useEffect(() => {
+    if (!showQuestion) return;
+
     const timerInterval = setInterval(() => {
       setTimer((prev) => {
         const newTime = prev + 1;
-        if (newTime >= 0 && !enableNext && index < questions.length - 1) {
+        if (newTime >= 25 && !enableNext && index < questions.length - 1) {
           setEnableNext(true);
         }
         if (newTime >= 3 && !enableFinish && index >= questions.length - 1) {
@@ -29,14 +46,16 @@ const NewQuiz = () => {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [enableNext, enableFinish, index, questions.length]);
+  }, [enableNext, enableFinish, index, questions.length, showQuestion]);
 
   // Reset timer and states when question changes
   useEffect(() => {
+    if (!showQuestion) return;
+    
     setTimer(0);
     setEnableNext(false);
     setEnableFinish(false);
-  }, [index]);
+  }, [index, showQuestion]);
 
   // WebSocket connection
   useEffect(() => {
@@ -77,6 +96,7 @@ const NewQuiz = () => {
         setQuestions(res.data);
         setLoading(false);
         setIndex(0);
+        setCountdown(5); // Start countdown when questions are loaded
       })
       .catch((err) => {
         console.error('Error fetching questions:', err);
@@ -117,6 +137,58 @@ const NewQuiz = () => {
       <p className="no-questions-text">Please check back later or contact the administrator.</p>
     </div>
   );
+
+  // Show countdown screen if countdown is active
+  if (!showQuestion) {
+    return (
+      <div className="countdown-container">
+        <div className="countdown-content">
+          <h1 className="countdown-title">Quiz Starting In...</h1>
+          <div className="countdown-number">{countdown}</div>
+          <div className="countdown-hint">Get ready!</div>
+        </div>
+        
+        <style jsx>{`
+          .countdown-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: white;
+          }
+          
+          .countdown-content {
+            text-align: center;
+          }
+          
+          .countdown-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+          }
+          
+          .countdown-number {
+            font-size: 8rem;
+            font-weight: 700;
+            line-height: 1;
+            margin: 1rem 0;
+            animation: pulse 1s infinite alternate;
+          }
+          
+          .countdown-hint {
+            font-size: 1.5rem;
+            opacity: 0.8;
+          }
+          
+          @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   const currentQuestion = questions[index] || {};
   const isLastQuestion = index >= questions.length - 1;
@@ -186,6 +258,8 @@ const NewQuiz = () => {
           {isLastQuestion ? 'Finish Quiz 🏁' : 'Next Question →'}
         </button>
       </div>
+
+     
 
       <style jsx>{`
         .quiz-container {

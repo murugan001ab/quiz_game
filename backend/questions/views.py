@@ -31,12 +31,7 @@ class UserCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class QuizQuestionListCreate(APIView):
-    """Fetch all questions"""
-    def get(self, request):
-        questions = Question.objects.all()
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
-
+   
     def post(self, request):
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
