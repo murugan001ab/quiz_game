@@ -75,9 +75,11 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/admin/start-quiz" element={
+
+            <ProtectedRoute>
          
               <QuizStartPage />
-           
+           </ProtectedRoute>
           } />
          
           
