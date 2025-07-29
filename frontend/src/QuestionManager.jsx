@@ -336,7 +336,7 @@ const QuestionManager = () => {
                   onChange={handleInputChange}
                   disabled={loading}
                 >
-                  <option value="not answered">Not Answered</option>
+                  <option value="not answered" selected >Not Answered</option>
                   <option value="answered">Answered</option>
                   <option value="skipped">Skipped</option>
                 </select>
