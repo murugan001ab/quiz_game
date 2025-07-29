@@ -53,7 +53,7 @@ const QuizPage = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://${BASE_URL}/questions/${adminId}`);
+        const response = await axios.get(`http://${BASE_URL}/fetch/admin/${adminId}`);
         setQuestions(response.data);
       } catch (err) {
         console.error("Error fetching questions:", err);
