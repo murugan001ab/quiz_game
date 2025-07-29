@@ -8,7 +8,7 @@ const QuizPage = () => {
   const { index, setIndex, aname,BASE_URL } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [timer, setTimer] = useState(15);
+  const [timer, setTimer] = useState(20);
   const [score, setScore] = useState(0);
   const [isFrozen, setIsFrozen] = useState(false);
   const [socket, setSocket] = useState(null);
@@ -69,7 +69,7 @@ const QuizPage = () => {
   useEffect(() => {
     if (questions.length === 0) return;
     
-    setTimer(15);
+    setTimer(20);
     setIsFrozen(false);
     setTimeExpired(false);
     setSelectedAnswers(prev => ({ ...prev, [index]: undefined }));
