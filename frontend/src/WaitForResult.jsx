@@ -10,7 +10,7 @@ const WaitForResult = () => {
   const [loading, setLoading] = useState(true);
   const socketRef = useRef(null);
 
-  const [adminId,setAdminId]=useSate(localStorage.getItem("adminId") || null )
+  const [adminId,setAdminId]=useState(localStorage.getItem("adminId") || null )
 
 
   useEffect(() => {
