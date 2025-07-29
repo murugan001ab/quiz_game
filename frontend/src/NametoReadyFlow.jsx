@@ -35,7 +35,7 @@ const GetReady = () => {
           console.log("Admin ID updated in context");
         }
 
-        if (data.show === true && data.action === 'start') {
+        if ((data.show === true && data.action === 'start') || (startgame=='true')) {
           console.log("Quiz is starting...");
           // Start a countdown before showing the quiz
           setCountdown(5);
