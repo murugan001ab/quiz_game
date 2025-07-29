@@ -10,6 +10,8 @@ const WaitForResult = () => {
   const [loading, setLoading] = useState(true);
   const socketRef = useRef(null);
 
+  const [adminId,setAdminId]=useSate(localStorage.getItem("adminId") || null )
+
 
   useEffect(() => {
     let reconnectAttempts = 0;
@@ -56,7 +58,7 @@ const WaitForResult = () => {
   const fetchResults = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://${BASE_URL}/users/?admin_id=5`);
+      const response = await axios.get(`http://${BASE_URL}/users/?admin_id=${adminId}`);
       const sortedResults = [...response.data].sort((a, b) => b.score - a.score);
       setResults(sortedResults);
     } catch (error) {
