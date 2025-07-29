@@ -31,6 +31,7 @@ const GetReady = () => {
         if (data.adminid) {
           setAdminId(data.adminid);
           localStorage.setItem('adminId',data.adminid);
+          localStorage.setItem('startgame',true);
           console.log("Admin ID updated in context");
         }
 
