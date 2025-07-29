@@ -91,7 +91,7 @@ const NewQuiz = () => {
   // Fetch questions
   useEffect(() => {
     axios
-      .get(`http://${BASE_URL}/questions/${adminId}`)
+      .get(`http://${BASE_URL}/fetch/admin/${adminId}`)
       .then((res) => {
         setQuestions(res.data);
         setLoading(false);
