@@ -238,7 +238,7 @@ const QuizPage = () => {
 // Updated styling with cursor: not-allowed and opacity: 0.7
 const styles = {
   container: {
-    maxWidth: '800px',
+    width: '800px',
     margin: '0 auto',
     padding: '20px',
     fontFamily: "'Inter', sans-serif",
