@@ -35,7 +35,7 @@ const NewQuiz = () => {
     const timerInterval = setInterval(() => {
       setTimer((prev) => {
         const newTime = prev + 1;
-        if (newTime >= 25 && !enableNext && index < questions.length - 1) {
+        if (newTime >= 2 && !enableNext && index < questions.length - 1) {
           setEnableNext(true);
         }
         if (newTime >= 3 && !enableFinish && index >= questions.length - 1) {

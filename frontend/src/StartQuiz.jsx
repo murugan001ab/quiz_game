@@ -78,16 +78,15 @@ const QuizStartPage = () => {
     }
   };
 
+  
   return (
     <div className="quiz-start-container">
       <div className="quiz-start-card">
         <div className="quiz-header">
           <h1>Quiz Game</h1>
           <div className="connection-status">
-            {/* <span className="status-indicator" style={{ backgroundColor: getStatusColor() }}></span>
-            <span className="status-text">Status: {connectionStatus}</span> */}
+            {/* Status indicator remains the same */}
           </div>
-          
         </div>
 
         <div className="qr-code-section">
@@ -152,26 +151,6 @@ const QuizStartPage = () => {
           font-size: 28px;
         }
 
-        .connection-status {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          color: #7f8c8d;
-          font-size: 14px;
-        }
-
-        .status-indicator {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          display: inline-block;
-        }
-
-        .status-text {
-          text-transform: capitalize;
-        }
-
         .qr-code-section {
           margin: 30px 0;
           padding: 20px;
@@ -192,6 +171,16 @@ const QuizStartPage = () => {
           border-radius: 8px;
           display: inline-block;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          /* QR code responsiveness */
+          max-width: 100%;
+          box-sizing: border-box;
+        }
+
+        /* Make QR code responsive */
+        .qr-code-wrapper :global(canvas) {
+          width: 100% !important;
+          max-width: 250px;
+          height: auto !important;
         }
 
         .qr-instruction {
@@ -215,6 +204,95 @@ const QuizStartPage = () => {
           align-items: center;
           justify-content: center;
           gap: 10px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+          .quiz-start-card {
+            padding: 25px 15px;
+          }
+
+          .quiz-header h1 {
+            font-size: 24px;
+          }
+
+          .qr-code-section {
+            padding: 15px;
+            margin: 20px 0;
+          }
+
+          .qr-code-section h2 {
+            font-size: 20px;
+          }
+
+          .qr-code-wrapper {
+            padding: 10px;
+            max-width: 80vw;
+          }
+
+          .qr-code-wrapper :global(canvas) {
+            max-width: 70vw;
+          }
+
+          .qr-instruction {
+            font-size: 13px;
+          }
+
+          .start-quiz-btn {
+            padding: 12px 20px;
+            font-size: 15px;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .quiz-start-container {
+            padding: 15px;
+          }
+
+          .quiz-header h1 {
+            font-size: 22px;
+          }
+
+          .qr-code-section {
+            padding: 12px;
+          }
+
+          .qr-code-section h2 {
+            font-size: 18px;
+          }
+
+          .qr-code-wrapper {
+            max-width: 85vw;
+          }
+
+          .qr-code-wrapper :global(canvas) {
+            max-width: 75vw;
+          }
+
+          .start-quiz-btn {
+            font-size: 14px;
+          }
+        }
+
+        /* Existing styles remain below... */
+        .connection-status {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          color: #7f8c8d;
+          font-size: 14px;
+        }
+
+        .status-indicator {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          display: inline-block;
+        }
+
+        .status-text {
+          text-transform: capitalize;
         }
 
         .start-quiz-btn:hover:not(:disabled) {
@@ -254,40 +332,6 @@ const QuizStartPage = () => {
           color: #e74c3c;
           font-size: 14px;
           margin: 0;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 600px) {
-          .quiz-start-card {
-            padding: 30px 20px;
-          }
-
-          .quiz-header h1 {
-            font-size: 24px;
-          }
-
-          .qr-code-section {
-            padding: 15px;
-          }
-
-          .qr-code-section h2 {
-            font-size: 20px;
-          }
-
-          .start-quiz-btn {
-            padding: 12px 20px;
-            font-size: 15px;
-          }
-        }
-
-        @media (max-width: 400px) {
-          .quiz-start-container {
-            padding: 15px;
-          }
-
-          .quiz-header h1 {
-            font-size: 22px;
-          }
         }
       `}</style>
     </div>

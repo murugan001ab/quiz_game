@@ -27,7 +27,9 @@ const WaitForResult = () => {
 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if ((data.type === 'results_control' && data.show ) || (startgame=='true')) {
+        if ((data.type === 'results_control' && data.show ) )
+          // || (startgame=='true')
+        {
           fetchResults();
         }
       };
