@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AdminContext } from './AdminProvider';
 
 const WaitForResult = () => {
-  const { BASE_URL } = useContext(AdminContext);
+  const { BASE_URL,BASE } = useContext(AdminContext);
   const navigate = useNavigate();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,7 @@ const WaitForResult = () => {
     const maxReconnectAttempts = 5;
     
     const connectWebSocket = () => {
-      const ws = new WebSocket(`wss://${BASE_URL}/ws/result/`);
+      const ws = new WebSocket(`wss://${BASE}/ws/result/`);
       
       ws.onopen = () => {
         reconnectAttempts = 0;

@@ -12,10 +12,10 @@ const GetReady = () => {
 
   
   // Get all needed values from context
-  const { aname, adminId, setAdminId,BASE_URL } = useContext(AdminContext);
+  const { aname, adminId, setAdminId,BASE } = useContext(AdminContext);
 
   useEffect(() => {
-    socket.current = new WebSocket(`wss://${BASE_URL}/ws/chat/`);
+    socket.current = new WebSocket(`wss://${BASE}/ws/chat/`);
 
     socket.current.onopen = () => {
       console.log("✅ WebSocket connected");

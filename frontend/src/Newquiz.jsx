@@ -7,7 +7,7 @@ const NewQuiz = () => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { index, setIndex, socket, setSocket, BASE_URL } = useContext(AdminContext);
+  const { index, setIndex, socket, setSocket, BASE_URL ,BASE} = useContext(AdminContext);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
   const [timer, setTimer] = useState(0);
   const [enableNext, setEnableNext] = useState(false);
@@ -59,7 +59,7 @@ const NewQuiz = () => {
 
   // WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket(`wss://${BASE_URL}/ws/index/`);
+    const ws = new WebSocket(`wss://${BASE}/ws/index/`);
 
     ws.onopen = () => {
       console.log('WebSocket Connected');

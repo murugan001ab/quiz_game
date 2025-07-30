@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { index, setIndex, aname,BASE_URL } = useContext(AdminContext);
+  const { index, setIndex, aname,BASE_URL,BASE } = useContext(AdminContext);
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [timer, setTimer] = useState(20);
@@ -19,7 +19,7 @@ const QuizPage = () => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket(`wss://${BASE_URL}/ws/index/`);
+    const ws = new WebSocket(`wss://${BASE}/ws/index/`);
 
     console.log("Stored Admin ID:", adminId);
     

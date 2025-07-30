@@ -10,14 +10,14 @@ const ResultsPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
-  const { BASE_URL} = useContext(AdminContext);
+  const { BASE_URL,BASE} = useContext(AdminContext);
 
 
   const adminId = localStorage.getItem('adminId') || null;
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket(`wss://${BASE_URL}/ws/result/`);
+    const ws = new WebSocket(`wss://${BASE}/ws/result/`);
     
     ws.onopen = () => {
       console.log('Connected to results WebSocket');
