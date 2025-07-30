@@ -437,4 +437,4 @@ const styleElement = document.createElement('style');
 styleElement.innerHTML = globalStyles;
 document.head.appendChild(styleElement);
 
-export default QuizPage; there is mistake in css that is if i use in mobile options with is not fixed so give me proper mobile reposive css atractive style
+export default QuizPage;
