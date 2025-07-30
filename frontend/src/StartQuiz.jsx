@@ -8,7 +8,7 @@ const QuizStartPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
-  const { BASE_URL} = useContext(AdminContext);
+  const { BASE_URL,BASE} = useContext(AdminContext);
 
   const [adminId, setAdminId] = useState(localStorage.getItem('adminId') || null);
 
@@ -21,7 +21,7 @@ const QuizStartPage = () => {
       console.log("Stored Admin ID:", adminId);
       setAdminId(adminId);
 
-    socket.current = new WebSocket(`ws://${BASE_URL}/ws/chat/`);
+    socket.current = new WebSocket(`wss://${BASE}/ws/chat/`);
 
     socket.current.onopen = () => {
       console.log("✅ WebSocket connected");

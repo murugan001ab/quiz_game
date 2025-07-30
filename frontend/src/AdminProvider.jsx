@@ -11,7 +11,7 @@ export const AdminProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false);
 
    const BASE_URL = 'quizgamehub.duckdns.org/api';
-//  const BASE_URL = 'localhost:8000'; 
+   const BASE = 'quizgamehub.duckdns.org'; 
   
    const logout = () => {
     localStorage.removeItem('adminId');
@@ -22,7 +22,7 @@ export const AdminProvider = ({ children }) => {
 
 
   return (
-    <AdminContext.Provider value={{ adminId, setAdminId,Qtime,setQTime,index,setIndex ,socket, setSocket, aname, setName , isLogin, setIsLogin,logout ,BASE_URL}}>
+    <AdminContext.Provider value={{ BASE,adminId, setAdminId,Qtime,setQTime,index,setIndex ,socket, setSocket, aname, setName , isLogin, setIsLogin,logout ,BASE_URL}}>
       {children}
     </AdminContext.Provider>
   );
