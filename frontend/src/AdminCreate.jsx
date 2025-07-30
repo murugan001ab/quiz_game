@@ -36,6 +36,7 @@ const AdminCreatePage = () => {
       setIsSuccess(true);
       setAdminData({ name: "", password: "" });
     } catch (err) {
+	console.log(adminData);
       console.error(err);
       setMessage("Error creating admin.");
       setIsSuccess(false);
