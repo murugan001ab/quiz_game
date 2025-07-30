@@ -234,8 +234,6 @@ const QuizPage = () => {
 
 
 
-
-// Updated styling with cursor: not-allowed and opacity: 0.7
 const styles = {
   container: {
     maxWidth: '800px',
@@ -245,12 +243,17 @@ const styles = {
     backgroundColor: '#F3F3E0',
     minHeight: '100vh',
     color: '#183B4E',
+    boxSizing: 'border-box',
   },
   header: {
     display: 'flex',
     flexDirection: 'column',
     gap: '15px',
     marginBottom: '25px',
+    '@media (max-width: 600px)': {
+      gap: '10px',
+      marginBottom: '15px',
+    },
   },
   progress: {
     width: '100%',
@@ -273,6 +276,9 @@ const styles = {
     color: '#183B4E',
     textAlign: 'right',
     fontWeight: '500',
+    '@media (max-width: 600px)': {
+      fontSize: '12px',
+    },
   },
   timerContainer: {
     display: 'flex',
@@ -289,6 +295,10 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '5px',
+    '@media (max-width: 600px)': {
+      padding: '6px 12px',
+      fontSize: '12px',
+    },
   },
   timeUp: {
     marginLeft: '5px',
@@ -302,6 +312,10 @@ const styles = {
     marginBottom: '20px',
     boxShadow: '0 4px 12px rgba(24, 59, 78, 0.1)',
     border: '1px solid rgba(24, 59, 78, 0.1)',
+    '@media (max-width: 600px)': {
+      padding: '15px',
+      borderRadius: '10px',
+    },
   },
   questionText: {
     fontSize: '20px',
@@ -309,6 +323,10 @@ const styles = {
     color: '#183B4E',
     lineHeight: '1.5',
     fontWeight: '600',
+    '@media (max-width: 600px)': {
+      fontSize: '18px',
+      marginBottom: '15px',
+    },
   },
   options: {
     display: 'flex',
@@ -326,6 +344,12 @@ const styles = {
     transition: 'all 0.3s ease',
     textAlign: 'left',
     fontSize: '16px',
+    minHeight: '60px', // Ensure consistent height
+    '@media (max-width: 600px)': {
+      padding: '12px',
+      fontSize: '14px',
+      minHeight: '50px',
+    },
     '&:hover:enabled': {
       backgroundColor: 'rgba(24, 59, 78, 0.08)',
     }
@@ -338,33 +362,35 @@ const styles = {
     boxShadow: '0 4px 8px rgba(24, 59, 78, 0.2)',
   },
   correctOption: {
-    borderColor: '#fefefeff',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    borderColor: '#4CAF50',
   },
   incorrectOption: {
-    borderColor: '#ffffffff',
+    backgroundColor: '#F44336',
+    color: 'white',
+    borderColor: '#F44336',
   },
-  // Changed style for non-selected options
   nonSelectedOption: {
-    opacity: 0.7, 
+    opacity: 0.7,
     cursor: 'not-allowed',
+    '@media (max-width: 600px)': {
+      opacity: 0.6, // Slightly more visible on mobile
+    },
   },
   optionLetter: {
     fontWeight: 'bold',
     marginRight: '10px',
     fontSize: '18px',
     minWidth: '24px',
+    '@media (max-width: 600px)': {
+      fontSize: '16px',
+      minWidth: '20px',
+    },
   },
   optionText: {
     flex: 1,
-  },
-  timeUpMessage: {
-    backgroundColor: 'rgba(24, 59, 78, 0.05)',
-    color: '#183B4E',
-    padding: '15px',
-    borderRadius: '8px',
-    marginBottom: '20px',
-    textAlign: 'center',
-    border: '1px dashed rgba(24, 59, 78, 0.2)',
+    wordBreak: 'break-word', // Ensure long text wraps
   },
   finishButton: {
     width: '100%',
@@ -378,6 +404,10 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     marginTop: '20px',
+    '@media (max-width: 600px)': {
+      padding: '12px',
+      fontSize: '16px',
+    },
     '&:hover': {
       backgroundColor: '#102a3a',
       transform: 'translateY(-2px)',
@@ -391,6 +421,7 @@ const styles = {
     justifyContent: 'center',
     height: '100vh',
     backgroundColor: '#F3F3E0',
+    padding: '20px',
   },
   loadingSpinner: {
     border: '5px solid rgba(24, 59, 78, 0.1)',
@@ -400,15 +431,23 @@ const styles = {
     height: '50px',
     animation: 'spin 1s linear infinite',
     marginBottom: '20px',
+    '@media (max-width: 600px)': {
+      width: '40px',
+      height: '40px',
+    },
   },
   loadingText: {
     fontSize: '18px',
     color: '#183B4E',
     fontWeight: '500',
+    textAlign: 'center',
+    '@media (max-width: 600px)': {
+      fontSize: '16px',
+    },
   },
 };
 
-// Add global styles
+// Enhanced global styles with mobile considerations
 const globalStyles = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -420,6 +459,7 @@ const globalStyles = `
     font-family: 'Inter', sans-serif;
     background-color: #F3F3E0;
     color: #183B4E;
+    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape */
   }
   
   * {
@@ -429,6 +469,19 @@ const globalStyles = `
   button {
     outline: none;
     font-family: inherit;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  }
+  
+  /* Touch-friendly elements */
+  @media (max-width: 600px) {
+    input, button, textarea, select {
+      font-size: 16px !important; /* Prevent iOS zoom on focus */
+    }
+    
+    button, [role="button"] {
+      min-height: 48px; /* Minimum touch target size */
+      min-width: 48px;
+    }
   }
 `;
 
