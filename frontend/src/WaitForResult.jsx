@@ -86,7 +86,7 @@ const WaitForResult = () => {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
-      padding: '20px',
+      padding: '10px',
       fontFamily: "'Inter', sans-serif",
     },
     loadingCard: {
@@ -153,7 +153,7 @@ const WaitForResult = () => {
       textAlign: 'left',
     },
     tableHeaderCell: {
-      padding: '18px 24px',
+      padding: '10px 20px',
       fontWeight: '600',
       fontSize: '1.1rem',
     },
@@ -162,13 +162,13 @@ const WaitForResult = () => {
       transition: 'all 0.3s ease',
     },
     tableCell: {
-      padding: '18px 24px',
+      padding: '10px 20px',
       fontWeight: '500',
       color: '#1E293B',
     },
     rankBadge: {
-      width: '44px',
-      height: '44px',
+      width: '30px',
+      height: '30px',
       borderRadius: '50%',
       display: 'flex',
       alignItems: 'center',
@@ -181,7 +181,7 @@ const WaitForResult = () => {
     scoreBadge: {
       background: 'linear-gradient(135deg, #E0F2FE, #BAE6FD)',
       color: '#0369A1',
-      padding: '8px 16px',
+      padding: '8px 10px',
       borderRadius: '20px',
       fontWeight: '600',
       fontSize: '0.9rem',
@@ -284,15 +284,15 @@ const WaitForResult = () => {
                         </div>
                       </td>
                       <td style={styles.tableCell}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <div style={{
+                        <div style={{ display: 'flex', alignItems: 'center' ,fontWeight: '600'}}>
+                          {/* <div style={{
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
                             marginRight: '12px',
                             background: index < 3 ? 'linear-gradient(90deg, #4F46E5, #7C3AED)' : '#A5B4FC',
-                          }}></div>
-                          {participant.name || `Participant ${index + 1}`}
+                          }}></div> */}
+                          {participant.name.toUpperCase() || `Participant ${index + 1}`}
                         </div>
                       </td>
                       <td style={{ ...styles.tableCell, textAlign: 'center' }}>
