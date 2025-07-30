@@ -15,7 +15,7 @@ const ChatComponent = ({ roomName, username }) => {
 
   // Reconnect logic
   const connectWebSocket = useCallback(() => {
-    const socketUrl = `ws://${BASE_URL}/ws/chat/${encodeURIComponent(roomName)}/`;
+    const socketUrl = `wss://${BASE_URL}/ws/chat/${encodeURIComponent(roomName)}/`;
     setConnectionStatus('Connecting...');
     setError(null);
 

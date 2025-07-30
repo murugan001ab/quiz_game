@@ -17,7 +17,7 @@ const ResultsPage = () => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket(`ws://${BASE_URL}/ws/result/`);
+    const ws = new WebSocket(`wss://${BASE_URL}/ws/result/`);
     
     ws.onopen = () => {
       console.log('Connected to results WebSocket');

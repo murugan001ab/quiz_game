@@ -18,7 +18,7 @@ const WaitForResult = () => {
     const maxReconnectAttempts = 5;
     
     const connectWebSocket = () => {
-      const ws = new WebSocket(`ws://${BASE_URL}/ws/result/`);
+      const ws = new WebSocket(`wss://${BASE_URL}/ws/result/`);
       
       ws.onopen = () => {
         reconnectAttempts = 0;

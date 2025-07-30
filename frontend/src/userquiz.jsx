@@ -19,7 +19,7 @@ const QuizPage = () => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket(`ws://${BASE_URL}/ws/index/`);
+    const ws = new WebSocket(`wss://${BASE_URL}/ws/index/`);
 
     console.log("Stored Admin ID:", adminId);
     

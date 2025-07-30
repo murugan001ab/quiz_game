@@ -15,7 +15,7 @@ const GetReady = () => {
   const { aname, adminId, setAdminId,BASE_URL } = useContext(AdminContext);
 
   useEffect(() => {
-    socket.current = new WebSocket(`ws://${BASE_URL}/ws/chat/`);
+    socket.current = new WebSocket(`wss://${BASE_URL}/ws/chat/`);
 
     socket.current.onopen = () => {
       console.log("✅ WebSocket connected");

@@ -59,7 +59,7 @@ const NewQuiz = () => {
 
   // WebSocket connection
   useEffect(() => {
-    const ws = new WebSocket(`ws://${BASE_URL}/ws/index/`);
+    const ws = new WebSocket(`wss://${BASE_URL}/ws/index/`);
 
     ws.onopen = () => {
       console.log('WebSocket Connected');
