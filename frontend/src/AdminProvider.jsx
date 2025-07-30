@@ -10,8 +10,8 @@ export const AdminProvider = ({ children }) => {
   const [aname, setName] = useState("");
   const [isLogin, setIsLogin] = useState(false);
 
-  // const BASE_URL = 'quizmastershub.duckdns.org:8000';
-  const BASE_URL = 'localhost:8000'; 
+   const BASE_URL = 'quizgamehub.duckdns.org:8000';
+//  const BASE_URL = 'localhost:8000'; 
   
    const logout = () => {
     localStorage.removeItem('adminId');
