@@ -53,7 +53,7 @@ const QuizPage = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://${BASE_URL}/fetch/admin/${adminId}`);
+        const response = await axios.get(`https://${BASE_URL}/fetch/admin/${adminId}`);
         setQuestions(response.data);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -127,7 +127,7 @@ const QuizPage = () => {
 
     console.log("Quiz finished. Final score:", score,aname, adminId);
     // Submit score to backend
-    axios.post(`http://${BASE_URL}/users/`, {
+    axios.post(`https://${BASE_URL}/users/`, {
       aname:aname,
       score:score,
       admin_id:adminId

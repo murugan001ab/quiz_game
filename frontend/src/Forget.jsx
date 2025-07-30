@@ -17,7 +17,7 @@ const ResetPassword = () => {
         e.preventDefault();
 
         try {
-            const res = await axios.post(`http://${BASE_URL}/api/admin/forgot-password/`, {
+            const res = await axios.post(`https://${BASE_URL}/api/admin/forgot-password/`, {
                 name: formData.name,
                 new_password: formData.newPassword
             });

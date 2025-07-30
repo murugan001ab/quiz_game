@@ -29,7 +29,7 @@ const AdminCreatePage = () => {
 
     try {
       const res = await axios.post(
-        `http://${BASE_URL}/api/admin/create/`, 
+        `https://${BASE_URL}/api/admin/create/`, 
         adminData
       );
       setMessage("Admin created successfully!");

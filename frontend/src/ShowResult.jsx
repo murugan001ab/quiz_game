@@ -39,7 +39,7 @@ const ResultsPage = () => {
     setLoading(true);
     try {
       console.log("Fetching results for admin:", adminId);
-      const response = await axios.get(`http://${BASE_URL}/users/?admin_id=${adminId}`);
+      const response = await axios.get(`https://${BASE_URL}/users/?admin_id=${adminId}`);
       const sortedResults = [...response.data].sort((a, b) => b.score - a.score);
       setResults(sortedResults);
     } catch (err) {

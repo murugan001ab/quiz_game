@@ -20,7 +20,7 @@ const QuestionManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_BASE = `http://${BASE_URL}/`;
+  const API_BASE = `https://${BASE_URL}/`;
 
   // Debug network requests
   useEffect(() => {
