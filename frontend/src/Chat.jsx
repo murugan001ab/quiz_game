@@ -11,11 +11,11 @@ const ChatComponent = ({ roomName, username }) => {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  const {BASE} = useContext(AdminContext);
+  const {BASE_URL} = useContext(AdminContext);
 
   // Reconnect logic
   const connectWebSocket = useCallback(() => {
-    const socketUrl = `wss://${BASE}/ws/chat/${encodeURIComponent(roomName)}/`;
+    const socketUrl = `ws://${BASE_URL}/ws/chat/${encodeURIComponent(roomName)}/`;
     setConnectionStatus('Connecting...');
     setError(null);
 

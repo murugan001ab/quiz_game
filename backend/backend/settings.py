@@ -59,16 +59,16 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-#    "http://localhost:5173",
-    "https://quizgamehub.duckdns.org"
+   "http://localhost:5173",
+    "http://quizgamehub.duckdns.org"
     # "http://10.16.58.181:5173/"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://quizgamehub.duckdns.org",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "http://quizgamehub.duckdns.org",
+# ]
 
 
 ROOT_URLCONF = "backend.urls"
@@ -88,7 +88,7 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = "backend.wsgi.application"
+WSGI_APPLICATION = "backend.wsgi.application"
 
 # ASGI_APPLICATION = "backend.asgi.application"
 ASGI_APPLICATION = "backend.asgi.application"

@@ -12,10 +12,10 @@ const GetReady = () => {
 
   
   // Get all needed values from context
-  const { aname, adminId, setAdminId,BASE } = useContext(AdminContext);
+  const { aname, adminId, setAdminId,BASE_URL } = useContext(AdminContext);
 
   useEffect(() => {
-    socket.current = new WebSocket(`wss://${BASE}/ws/chat/`);
+    socket.current = new WebSocket(`ws://${BASE_URL}/ws/chat/`);
 
     socket.current.onopen = () => {
       console.log("✅ WebSocket connected");
@@ -35,7 +35,7 @@ const GetReady = () => {
           console.log("Admin ID updated in context");
         }
 
-        if ((data.show === true && data.action === 'start') || (startgame=='true')) {
+        if ((data.show === true && data.action === 'start')) {
           console.log("Quiz is starting...");
           // Start a countdown before showing the quiz
           setCountdown(5);
