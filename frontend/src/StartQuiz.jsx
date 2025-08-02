@@ -1,3 +1,4 @@
+// ...imports
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from './AdminProvider';
@@ -5,21 +6,19 @@ import QRCodeGenerator from './ScanQr';
 
 const QuizStartPage = () => {
   const socket = useRef(null);
+  const socketName = useRef(null);
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
-  const { BASE_URL} = useContext(AdminContext);
+  const { BASE_URL } = useContext(AdminContext);
 
   const [adminId, setAdminId] = useState(localStorage.getItem('adminId') || null);
+  const [userList, setUserList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
-
-
-
+  // WebSocket for quiz control
   useEffect(() => {
-    // Connect to WebSocket
-      const adminId = localStorage.getItem('adminId');
-      console.log("Stored Admin ID:", adminId);
-      setAdminId(adminId);
+    const adminId = localStorage.getItem('adminId');
+    setAdminId(adminId);
 
     socket.current = new WebSocket(`ws://${BASE_URL}/ws/chat/`);
 
@@ -28,106 +27,109 @@ const QuizStartPage = () => {
       setConnectionStatus('connected');
     };
 
-    socket.current.onclose = () => {
-      console.log("WebSocket closed");
-      setConnectionStatus('disconnected');
-    };
+    socket.current.onclose = () => setConnectionStatus('disconnected');
+    socket.current.onerror = () => setConnectionStatus('error');
 
-    socket.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      setConnectionStatus('error');
-    };
-
-    return () => {
-      if (socket.current?.readyState === WebSocket.OPEN) {
-        socket.current.close();
-      }
-    };
+    return () => socket.current?.close();
   }, []);
 
-  const startQuiz = () => {
-    if (connectionStatus !== 'connected') {
-      alert('WebSocket not connected. Please try again.');
-      return;
-    }
+  // WebSocket for user name list
+  useEffect(() => {
+    socketName.current = new WebSocket(`ws://${BASE_URL}/ws/name/`);
 
+    socketName.current.onopen = () => {
+      console.log("✅ [NAME] WebSocket connected");
+    };
+
+    socketName.current.onmessage = (event) => {
+  console.log("[NAME] Message received:", event.data);
+  try {
+    const data = JSON.parse(event.data);
+    console.log("[NAME] Received:", data);
+
+
+    if (data.type === "user_list" && Array.isArray(data.user_list)) {
+  setUserList((prevList) => {
+    const existingUsers = new Set(prevList);
+    const newUsers = data.user_list.filter((u) => !existingUsers.has(u));
+    return [...prevList, ...newUsers];
+  });
+
+}
+
+  } catch (error) {
+    console.error("[NAME] Error parsing message:", error);
+  }
+};
+
+   
+    return () => socketName.current?.close();
+  }, [userList]);
+
+  const startQuiz = () => {
+    if (connectionStatus !== 'connected') return alert("WebSocket not connected.");
     setIsLoading(true);
-    
-    try {
-      socket.current.send(JSON.stringify({ 
-        type: 'quiz-control', 
-        show: true,
-        action: 'start',
-        adminid: adminId,
-        timestamp: new Date().toISOString()
-      }));
-      console.log("Quiz start message sent");
-      navigate('/admin/new-quiz');
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      setIsLoading(false);
-    }
+
+    socket.current.send(JSON.stringify({
+      type: 'quiz-control',
+      show: true,
+      action: 'start',
+      adminid: adminId,
+      timestamp: new Date().toISOString()
+    }));
+
+    navigate('/admin/new-quiz');
   };
 
-  // const getStatusColor = () => {
-  //   switch(connectionStatus) {
-  //     case 'connected': return '#2ecc71';
-  //     case 'disconnected': return '#e74c3c';
-  //     case 'error': return '#f39c12';
-  //     default: return '#7f8c8d';
-  //   }
-  // };
-
-  
   return (
     <div className="quiz-start-container">
       <div className="quiz-start-card">
         <div className="quiz-header">
           <h1>Quiz Game</h1>
-          <div className="connection-status">
-            {/* Status indicator remains the same */}
+        </div>
+
+        <div className="content-area">
+          {/* Left: User List */}
+          <div className="user-list">
+            <h2>👥 Joined Users ({userList.length})</h2>
+            <ul>
+              {userList.map((user, idx) => (
+                <li key={idx}>{user}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Right: QR Code */}
+          <div className="qr-section">
+            <h2>Scan to Join</h2>
+            <div className="qr-wrapper">
+              <QRCodeGenerator />
+            </div>
+            <p className="qr-instruction">Participants can scan this QR to join</p>
           </div>
         </div>
 
-        <div className="qr-code-section">
-          <h2>Scan to Join</h2>
-          <div className="qr-code-wrapper">
-            <QRCodeGenerator />
-          </div>
-          <p className="qr-instruction">Participants can scan this QR code to join the quiz</p>
-        </div>
-
-        <button 
-          className={`start-quiz-btn ${isLoading ? 'loading' : ''}`} 
-          onClick={startQuiz} 
+        <button
+          className={`start-quiz-btn ${isLoading ? 'loading' : ''}`}
+          onClick={startQuiz}
           disabled={isLoading || connectionStatus !== 'connected'}
         >
-          {isLoading ? (
-            <>
-              <span className="spinner"></span>
-              Starting Quiz...
-            </>
-          ) : (
-            'Start Quiz Now'
-          )}
+          {isLoading ? <><span className="spinner"></span> Starting Quiz...</> : 'Start Quiz Now'}
         </button>
 
-        <div className="connection-help">
-          {connectionStatus !== 'connected' && (
-            <p className="help-text">
-              <i>⚠️ Connection issues detected. Please check your network and refresh the page.</i>
-            </p>
-          )}
-        </div>
+        {connectionStatus !== 'connected' && (
+          <p className="help-text">⚠️ Connection issue. Check network or refresh.</p>
+        )}
       </div>
 
+      {/* STYLE */}
       <style jsx>{`
         .quiz-start-container {
           min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          background: #ecf0f1;
           padding: 20px;
         }
 
@@ -135,203 +137,119 @@ const QuizStartPage = () => {
           background: white;
           border-radius: 16px;
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-          padding: 40px;
+          padding: 30px;
           width: 100%;
-          max-width: 500px;
+          max-width: 1000px;
           text-align: center;
         }
 
-        .quiz-header {
-          margin-bottom: 30px;
-        }
-
         .quiz-header h1 {
+          font-size: 32px;
+          margin-bottom: 20px;
           color: #2c3e50;
-          margin: 0 0 10px 0;
-          font-size: 28px;
         }
 
-        .qr-code-section {
-          margin: 30px 0;
+        .content-area {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          gap: 30px;
+        }
+
+        .user-list, .qr-section {
+          flex: 1 1 45%;
+          background: #f7f9fb;
           padding: 20px;
-          background: #f8f9fa;
           border-radius: 12px;
+          box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
         }
 
-        .qr-code-section h2 {
-          color: #2c3e50;
-          margin-top: 0;
-          font-size: 22px;
+        .user-list h2, .qr-section h2 {
+          font-size: 20px;
+          color: #34495e;
         }
 
-        .qr-code-wrapper {
-          margin: 20px auto;
-          padding: 15px;
+        .user-list ul {
+          list-style: none;
+          padding: 0;
+          text-align: left;
+          margin-top: 15px;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .user-list ul li {
+          padding: 8px 10px;
           background: white;
-          border-radius: 8px;
-          display: inline-block;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-          /* QR code responsiveness */
-          max-width: 100%;
-          box-sizing: border-box;
+          border: 1px solid #ddd;
+          margin-bottom: 8px;
+          border-radius: 6px;
+          font-size: 15px;
         }
 
-        /* Make QR code responsive */
-        .qr-code-wrapper :global(canvas) {
-          width: 100% !important;
-          max-width: 250px;
-          height: auto !important;
+        .qr-wrapper {
+          background: white;
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          display: inline-block;
         }
 
         .qr-instruction {
+          margin-top: 10px;
+          font-size: 13px;
           color: #7f8c8d;
-          font-size: 14px;
-          margin-bottom: 0;
         }
 
         .start-quiz-btn {
+          margin-top: 30px;
           background: #3498db;
           color: white;
-          border: none;
           padding: 15px 30px;
-          border-radius: 8px;
+          border: none;
+          border-radius: 10px;
           font-size: 16px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
+          transition: background 0.3s;
         }
 
-        /* Mobile responsiveness */
-        @media (max-width: 600px) {
-          .quiz-start-card {
-            padding: 25px 15px;
-          }
-
-          .quiz-header h1 {
-            font-size: 24px;
-          }
-
-          .qr-code-section {
-            padding: 15px;
-            margin: 20px 0;
-          }
-
-          .qr-code-section h2 {
-            font-size: 20px;
-          }
-
-          .qr-code-wrapper {
-            padding: 10px;
-            max-width: 80vw;
-          }
-
-          .qr-code-wrapper :global(canvas) {
-            max-width: 70vw;
-          }
-
-          .qr-instruction {
-            font-size: 13px;
-          }
-
-          .start-quiz-btn {
-            padding: 12px 20px;
-            font-size: 15px;
-          }
-        }
-
-        @media (max-width: 400px) {
-          .quiz-start-container {
-            padding: 15px;
-          }
-
-          .quiz-header h1 {
-            font-size: 22px;
-          }
-
-          .qr-code-section {
-            padding: 12px;
-          }
-
-          .qr-code-section h2 {
-            font-size: 18px;
-          }
-
-          .qr-code-wrapper {
-            max-width: 85vw;
-          }
-
-          .qr-code-wrapper :global(canvas) {
-            max-width: 75vw;
-          }
-
-          .start-quiz-btn {
-            font-size: 14px;
-          }
-        }
-
-        /* Existing styles remain below... */
-        .connection-status {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          color: #7f8c8d;
-          font-size: 14px;
-        }
-
-        .status-indicator {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          display: inline-block;
-        }
-
-        .status-text {
-          text-transform: capitalize;
+        .start-quiz-btn:disabled {
+          background: #95a5a6;
+          cursor: not-allowed;
         }
 
         .start-quiz-btn:hover:not(:disabled) {
           background: #2980b9;
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(41, 128, 185, 0.3);
-        }
-
-        .start-quiz-btn:disabled {
-          background: #bdc3c7;
-          cursor: not-allowed;
-          opacity: 0.8;
-        }
-
-        .start-quiz-btn.loading {
-          background: #3498db;
         }
 
         .spinner {
           width: 18px;
           height: 18px;
           border: 3px solid rgba(255, 255, 255, 0.3);
-          border-radius: 50%;
           border-top-color: white;
-          animation: spin 1s ease-in-out infinite;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
 
-        .connection-help {
+        .help-text {
           margin-top: 20px;
+          font-size: 14px;
+          color: #e74c3c;
         }
 
-        .help-text {
-          color: #e74c3c;
-          font-size: 14px;
-          margin: 0;
+        @media (max-width: 768px) {
+          .content-area {
+            flex-direction: column;
+          }
+
+          .user-list, .qr-section {
+            flex: 1 1 100%;
+          }
         }
       `}</style>
     </div>

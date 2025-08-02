@@ -1,20 +1,81 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminContext } from "./AdminProvider";
 
 function NameGet() {
   const navigate = useNavigate();
-  const { aname, setName } = useContext(AdminContext);
+  const { aname, setName, BASE_URL } = useContext(AdminContext);
+  const socket = useRef(null);
+
+  // Connect WebSocket on mount
+  useEffect(() => {
+    socket.current = new WebSocket(`ws://${BASE_URL}/ws/name/`);
+
+    socket.current.onopen = () => {
+      console.log("✅ WebSocket connected in NameGet");
+    };
+
+    socket.current.onerror = (err) => {
+      console.error("❌ WebSocket error:", err);
+    };
+
+    socket.current.onclose = () => {
+      console.log("🔌 WebSocket closed in NameGet");
+    };
+
+    // 👇 Handle messages from the backend
+    socket.current.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log("📥 Received:", data);
+
+        // Example: expect { type: "user_list", users: [...] }
+        if (data.type === "user_list") {
+          console.log("👥 Online Users:", data.users);
+          // you can store this in context or state if needed
+        }
+      } catch (error) {
+        console.error("❌ Failed to parse WebSocket message:", event.data);
+      }
+    };
+
+    return () => {
+      if (socket.current?.readyState === WebSocket.OPEN) {
+        socket.current.close();
+      }
+    };
+  }, [BASE_URL]);
+
+  // Retry sending message until socket is ready
+  const sendWhenReady = (message, retries = 10) => {
+    if (socket.current?.readyState === WebSocket.OPEN) {
+      socket.current.send(JSON.stringify(message));
+      console.log("📤 Sent message to WebSocket:", message);
+    } else if (retries > 0) {
+      console.log("⌛ Waiting for WebSocket to open... retries left:", retries);
+      setTimeout(() => sendWhenReady(message, retries - 1), 300);
+    } else {
+      console.warn("⚠️ Failed to send message: WebSocket not ready");
+    }
+  };
 
   const handleNext = () => {
     if (aname.trim() && aname.length >= 3) {
+      localStorage.setItem("aname", aname);
+
+      // Send name to backend
+      sendWhenReady({
+        type: "register_name",
+        username: aname,
+      });
+
       navigate("/readyquiz");
-      setName(aname);
-    }
-    else if(aname.length < 3) {
+    } else {
       alert("Please enter a name with at least 3 characters.");
     }
   };
+
+ 
 
   return (
     <div style={styles.container}>

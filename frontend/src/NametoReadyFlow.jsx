@@ -26,6 +26,9 @@ const GetReady = () => {
       try {
         const data = JSON.parse(event.data);
         console.log("Received message:", data);
+        
+        
+        
 
         // Always update admin ID if it's in the message
         if (data.adminid) {
@@ -33,6 +36,7 @@ const GetReady = () => {
           localStorage.setItem('adminId',data.adminid);
           localStorage.setItem('startgame',true);
           console.log("Admin ID updated in context");
+
         }
 
         if ((data.show === true && data.action === 'start')) {

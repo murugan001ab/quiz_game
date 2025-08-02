@@ -10,7 +10,7 @@ export const AdminProvider = ({ children }) => {
   const [aname, setName] = useState("");
   const [isLogin, setIsLogin] = useState(false);
 
-   const BASE_URL = '98.70.42.242:8000';
+   const BASE_URL = '10.241.66.181:8000';
   //  const BASE = 'quizgamehub.duckdns.org'; 
   
    const logout = () => {

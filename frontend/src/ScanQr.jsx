@@ -1,7 +1,7 @@
 import { QRCodeCanvas } from 'qrcode.react';
 
 function QRCodeGenerator() {
-  const data = "http://98.70.42.242:5173/admin/nametoready"; // or any string or URL
+  const data = "http://10.241.66.181:5173/admin/nametoready"; // or any string or URL
 
   return (
     <div style={{ 
